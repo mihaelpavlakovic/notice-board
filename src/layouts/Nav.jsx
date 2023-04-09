@@ -1,12 +1,15 @@
 // react imports
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 // library imports
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import { logout } from "../store/user/userActions";
 
 const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
 
   return (
     <header className="bg-indigo-600 p-4 text-slate-100">
@@ -37,6 +40,25 @@ const Nav = () => {
             <li>
               <Link to="/profil" className="lg:px-5 py-1 block">
                 Profil
+              </Link>
+            </li>
+            <li>
+              <Link to="/prijava" className="lg:px-5 py-1 block">
+                Prijava
+              </Link>
+            </li>
+            <li>
+              <Link to="/registracija" className="lg:px-5 py-1 block">
+                Registracija
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/prijava"
+                className="lg:px-5 py-1 block"
+                onClick={() => dispatch(logout())}
+              >
+                Odjavi se
               </Link>
             </li>
           </ul>
