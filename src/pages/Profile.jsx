@@ -1,7 +1,15 @@
 import React from "react";
 
+// component imports
+import Nav from "../layouts/Nav";
+
 const Profile = () => {
-  return <div>Profile page</div>;
+  return (
+    <>
+      <Nav />
+      <div>Profile page</div>;
+    </>
+  );
 };
 
 export default Profile;

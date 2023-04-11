@@ -5,10 +5,25 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { auth, storage } from "../../database/firebase";
 import {
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { setCurrentUser } from "./userSlice";
+
+export const listenAuthState = createAsyncThunk(
+  "user/listenAuthState",
+  async (_, { dispatch }) => {
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        dispatch(setCurrentUser(JSON.stringify(user)));
+      } else {
+        dispatch(setCurrentUser(null));
+      }
+    });
+  }
+);
 
 export const register = createAsyncThunk(
   "user/register",

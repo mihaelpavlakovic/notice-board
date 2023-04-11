@@ -1,5 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { login, logout, register, uploadImage } from "./userActions";
+import {
+  listenAuthState,
+  login,
+  logout,
+  register,
+  uploadImage,
+} from "./userActions";
 
 export const userSlice = createSlice({
   name: "user",
@@ -7,12 +13,18 @@ export const userSlice = createSlice({
     user: null,
     userData: null,
     status: "idle",
+    isLoading: true,
     error: {
       errorCode: "",
       errorMessage: "",
     },
   },
-  reducers: {},
+  reducers: {
+    setCurrentUser: (state, action) => {
+      state.user = action.payload;
+      state.isLoading = false;
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(login.pending, state => {
@@ -70,6 +82,17 @@ export const userSlice = createSlice({
         state.status = "failed";
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
+      })
+      .addCase(listenAuthState.pending, state => {
+        state.status = "loading";
+      })
+      .addCase(listenAuthState.fulfilled, state => {
+        state.status = "succeeded";
+      })
+      .addCase(listenAuthState.rejected, (state, { error }) => {
+        state.status = "failed";
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
       });
   },
 });
@@ -77,7 +100,8 @@ export const userSlice = createSlice({
 export const selectUser = state => state.user.user;
 export const selectStatus = state => state.user.status;
 export const selectError = state => state.user.error;
+export const selectIsLoading = state => state.user.isLoading;
 
-export const { setData } = userSlice.actions;
+export const { setCurrentUser } = userSlice.actions;
 
 export default userSlice.reducer;

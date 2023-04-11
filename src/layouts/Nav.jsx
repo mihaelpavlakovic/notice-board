@@ -1,7 +1,8 @@
 // react imports
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../store/user/userSlice";
 
 // library imports
 import { Bars3Icon } from "@heroicons/react/24/outline";
@@ -10,6 +11,54 @@ import { logout } from "../store/user/userActions";
 const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+
+  let content;
+  if (user) {
+    content = (
+      <>
+        <li>
+          <Link to="/" className="lg:px-5 py-1 block">
+            Naslovna
+          </Link>
+        </li>
+        <li>
+          <Link to="/nova-objava" className="lg:px-5 py-1 block">
+            Nova Objava
+          </Link>
+        </li>
+        <li>
+          <Link to="/profil" className="lg:px-5 py-1 block">
+            Profil
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/prijava"
+            className="lg:px-5 py-1 block"
+            onClick={() => dispatch(logout())}
+          >
+            Odjavi se
+          </Link>
+        </li>
+      </>
+    );
+  } else {
+    content = (
+      <>
+        <li>
+          <Link to="/prijava" className="lg:px-5 py-1 block">
+            Prijava
+          </Link>
+        </li>
+        <li>
+          <Link to="/registracija" className="lg:px-5 py-1 block">
+            Registracija
+          </Link>
+        </li>
+      </>
+    );
+  }
 
   return (
     <header className="bg-indigo-600 p-4 text-slate-100">
@@ -27,40 +76,7 @@ const Nav = () => {
           } w-full lg:flex lg:w-auto`}
         >
           <ul className="text-base lg:flex lg:justify-between lg:items-center text-center">
-            <li>
-              <Link to="/" className="lg:px-5 py-1 block">
-                Naslovna
-              </Link>
-            </li>
-            <li>
-              <Link to="/nova-objava" className="lg:px-5 py-1 block">
-                Nova Objava
-              </Link>
-            </li>
-            <li>
-              <Link to="/profil" className="lg:px-5 py-1 block">
-                Profil
-              </Link>
-            </li>
-            <li>
-              <Link to="/prijava" className="lg:px-5 py-1 block">
-                Prijava
-              </Link>
-            </li>
-            <li>
-              <Link to="/registracija" className="lg:px-5 py-1 block">
-                Registracija
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/prijava"
-                className="lg:px-5 py-1 block"
-                onClick={() => dispatch(logout())}
-              >
-                Odjavi se
-              </Link>
-            </li>
+            {content}
           </ul>
         </nav>
       </div>

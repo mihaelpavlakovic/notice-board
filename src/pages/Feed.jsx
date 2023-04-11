@@ -1,7 +1,15 @@
 import React from "react";
 
+// component imports
+import Nav from "../layouts/Nav";
+
 const Feed = () => {
-  return <div>Hi</div>;
+  return (
+    <>
+      <Nav />
+      <div>Feed</div>
+    </>
+  );
 };
 
 export default Feed;
