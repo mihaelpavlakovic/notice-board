@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  fetchUserById,
   listenAuthState,
   login,
   logout,
@@ -93,11 +94,24 @@ export const userSlice = createSlice({
         state.status = "failed";
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
+      })
+      .addCase(fetchUserById.pending, state => {
+        state.status = "loading";
+      })
+      .addCase(fetchUserById.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.userData = payload;
+      })
+      .addCase(fetchUserById.rejected, (state, { error }) => {
+        state.status = "failed";
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
       });
   },
 });
 
 export const selectUser = state => state.user.user;
+export const selectUserData = state => state.user.userData;
 export const selectStatus = state => state.user.status;
 export const selectError = state => state.user.error;
 export const selectIsLoading = state => state.user.isLoading;

@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { listenAuthState } from "./store/user/userActions";
 import { useEffect } from "react";
-import { selectUser } from "./store/user/userSlice";
+import { selectUser, selectUserData } from "./store/user/userSlice";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Feed from "./pages/Feed";
 import CreatePost from "./pages/CreatePost";
@@ -17,6 +17,8 @@ import NotFound from "./pages/NotFound";
 function App() {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const userData = useSelector(selectUserData);
+  console.log("App ~ userData:", userData);
   console.log("App ~ user:", JSON.parse(user));
 
   useEffect(() => {

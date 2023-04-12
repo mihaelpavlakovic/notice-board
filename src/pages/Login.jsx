@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 // component imports
 import Nav from "../layouts/Nav";
 import Card from "../utils/Card";
-import { selectUser } from "../store/user/userSlice";
+import { selectStatus, selectUser } from "../store/user/userSlice";
 
 const Login = () => {
   const focusElement = useRef();
@@ -15,6 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const status = useSelector(selectStatus);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,7 +71,7 @@ const Login = () => {
               type="submit"
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md"
             >
-              Prijava
+              {status === "loading" ? "U tijeku..." : "Prijava"}
             </button>
           </form>
         </Card>

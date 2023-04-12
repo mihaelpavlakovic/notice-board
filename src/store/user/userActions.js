@@ -2,7 +2,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 // firebase imports
-import { auth, storage } from "../../database/firebase";
+import { auth, db, storage } from "../../database/firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { setCurrentUser } from "./userSlice";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export const listenAuthState = createAsyncThunk(
   "user/listenAuthState",
@@ -18,6 +19,7 @@ export const listenAuthState = createAsyncThunk(
     onAuthStateChanged(auth, user => {
       if (user) {
         dispatch(setCurrentUser(JSON.stringify(user)));
+        dispatch(fetchUserById(user.uid));
       } else {
         dispatch(setCurrentUser(null));
       }
@@ -44,6 +46,16 @@ export const register = createAsyncThunk(
         photoURL: downloadURL.payload,
       });
 
+      const docRef = doc(db, "users", user.uid);
+      console.log("docRef:", docRef);
+      await setDoc(docRef, {
+        uid: user.uid,
+        displayName: name,
+        email: email,
+        isAdmin: false,
+        photoURL: downloadURL.payload,
+      });
+
       return JSON.stringify(user);
     } catch (error) {
       throw error;
@@ -58,6 +70,24 @@ export const login = createAsyncThunk(
       const { user } = await signInWithEmailAndPassword(auth, email, password);
 
       return JSON.stringify(user);
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const fetchUserById = createAsyncThunk(
+  "users/fetchUserById",
+  async userId => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const userDocSnapshot = await getDoc(userDocRef);
+
+      if (userDocSnapshot.exists()) {
+        return userDocSnapshot.data();
+      } else {
+        throw new Error(`User with ID ${userId} does not exist`);
+      }
     } catch (error) {
       throw error;
     }
