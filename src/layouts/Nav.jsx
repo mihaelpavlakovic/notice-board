@@ -1,6 +1,6 @@
 // react imports
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../store/user/userSlice";
 
@@ -9,6 +9,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { logout } from "../store/user/userActions";
 
 const Nav = () => {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
@@ -18,17 +19,35 @@ const Nav = () => {
     content = (
       <>
         <li>
-          <Link to="/" className="lg:px-5 py-1 block">
+          <Link
+            to="/"
+            className="lg:px-5 py-1 block"
+            style={{
+              fontWeight: location.pathname === "/" ? "700" : "",
+            }}
+          >
             Naslovna
           </Link>
         </li>
         <li>
-          <Link to="/nova-objava" className="lg:px-5 py-1 block">
+          <Link
+            to="/nova-objava"
+            className="lg:px-5 py-1 block"
+            style={{
+              fontWeight: location.pathname === "/nova-objava" ? "700" : "",
+            }}
+          >
             Nova Objava
           </Link>
         </li>
         <li>
-          <Link to="/profil" className="lg:px-5 py-1 block">
+          <Link
+            to="/profil"
+            className="lg:px-5 py-1 block"
+            style={{
+              fontWeight: location.pathname === "/profil" ? "700" : "",
+            }}
+          >
             Profil
           </Link>
         </li>
@@ -38,7 +57,7 @@ const Nav = () => {
             className="lg:px-5 py-1 block"
             onClick={() => dispatch(logout())}
           >
-            Odjavi se
+            Odjava
           </Link>
         </li>
       </>
@@ -47,12 +66,24 @@ const Nav = () => {
     content = (
       <>
         <li>
-          <Link to="/prijava" className="lg:px-5 py-1 block">
+          <Link
+            to="/prijava"
+            className="lg:px-5 py-1 block"
+            style={{
+              fontWeight: location.pathname === "/prijava" ? "700" : "",
+            }}
+          >
             Prijava
           </Link>
         </li>
         <li>
-          <Link to="/registracija" className="lg:px-5 py-1 block">
+          <Link
+            to="/registracija"
+            className="lg:px-5 py-1 block"
+            style={{
+              fontWeight: location.pathname === "/registracija" ? "700" : "",
+            }}
+          >
             Registracija
           </Link>
         </li>

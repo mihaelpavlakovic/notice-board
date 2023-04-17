@@ -77,7 +77,7 @@ const Register = () => {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="profilePicture">Select a file:</label>
+              <label htmlFor="profilePicture">Odaberi sliku profila:</label>
               {profilePicture && (
                 <div className="flex flex-col items-center gap-1 w-[20rem] relative">
                   <img
