@@ -6,8 +6,10 @@ import Nav from "../layouts/Nav";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { createPost } from "../store/post/postActions";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const pollOptionRefs = useRef([]);
   const [postTitle, setPostTitle] = useState("");
@@ -79,6 +81,7 @@ const CreatePost = () => {
     setPostTitle("");
     setPostText("");
     setFiles([]);
+    navigate("/");
   };
 
   return (
