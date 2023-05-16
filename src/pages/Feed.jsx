@@ -12,6 +12,7 @@ import { fetchPosts } from "../store/post/postActions";
 import Card from "../utils/Card";
 import { selectUserData } from "../store/user/userSlice";
 import Post from "../utils/Post";
+import Spinner from "../utils/Spinner";
 
 const Feed = () => {
   const dispatch = useDispatch();
@@ -24,14 +25,6 @@ const Feed = () => {
     dispatch(fetchPosts());
   }, [dispatch]);
 
-  if (status === "loading") {
-    return <div>Ucitavanje objava...</div>;
-  }
-
-  if (status === "failed") {
-    return <div>Greska: {error}</div>;
-  }
-
   return (
     <>
       <Nav />
@@ -39,11 +32,14 @@ const Feed = () => {
         <h1 className="text-3xl my-5 font-semibold">
           Pozdrav {user?.displayName}
         </h1>
-        {posts?.map(post => (
-          <Card key={post.id}>
-            <Post postData={post} />
-          </Card>
-        ))}
+        {status === "loading" && <Spinner />}
+        {status === "failed" && <div>Greska: {error}</div>}
+        {status === "succeeded" &&
+          posts?.map(post => (
+            <Card key={post.id}>
+              <Post postData={post} />
+            </Card>
+          ))}
       </div>
     </>
   );

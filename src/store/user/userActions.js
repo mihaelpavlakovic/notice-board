@@ -11,7 +11,7 @@ import {
 } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { setCurrentUser } from "./userSlice";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 export const listenAuthState = createAsyncThunk(
   "user/listenAuthState",
@@ -88,6 +88,57 @@ export const fetchUserById = createAsyncThunk(
       } else {
         throw new Error(`User with ID ${userId} does not exist`);
       }
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const updateProfilePicture = createAsyncThunk(
+  "users/updateProfilePicture",
+  async (photo, thunkAPI) => {
+    try {
+      const user = auth.currentUser;
+
+      // Upload the photo to Firebase Storage
+      const downloadURL = await thunkAPI.dispatch(uploadImage(photo));
+
+      await updateProfile(user, {
+        photoURL: downloadURL.payload,
+      });
+
+      // Update the profile picture URL in the users collection
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        photoURL: downloadURL.payload,
+      });
+
+      return downloadURL.payload;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const updateProfileInfo = createAsyncThunk(
+  "users/updateProfileInfo",
+  async (displayName, thunkAPI) => {
+    try {
+      // Get the currently logged-in user
+      const user = auth.currentUser;
+
+      // Update the display name in the Firebase Authentication user profile
+      await updateProfile(user, {
+        displayName: displayName,
+      });
+
+      // Update the display name in the users collection
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        displayName: displayName,
+      });
+
+      return displayName;
     } catch (error) {
       throw error;
     }

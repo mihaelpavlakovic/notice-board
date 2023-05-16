@@ -94,6 +94,31 @@ export const createPost = createAsyncThunk(
   }
 );
 
+export const updatePost = createAsyncThunk(
+  "post/updatePost",
+  async (postData, thunkAPI) => {
+    try {
+      const { postId, title, text } = postData;
+
+      const postRef = doc(db, "posts", postId);
+
+      // Update the post document with the new title and text values
+      await updateDoc(postRef, {
+        title: title,
+        text: text,
+      });
+
+      return {
+        postId: postId,
+        title: title,
+        text: text,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const createComment = createAsyncThunk(
   "post/createComment",
   async (commentData, thunkAPI) => {
@@ -112,6 +137,11 @@ export const createComment = createAsyncThunk(
       await updateDoc(doc(db, "posts", postId), {
         comments: arrayUnion(comment),
       });
+
+      return {
+        postId,
+        comment,
+      };
     } catch (error) {
       throw error;
     }
@@ -125,12 +155,24 @@ export const updateComment = createAsyncThunk(
       // Extract the necessary data from commentData
       const { postId, commentId, commentValue } = commentData;
 
-      // Update the comment value in the specific post document
-      await updateDoc(doc(db, "posts", postId, "comments", commentId), {
-        value: commentValue,
+      const docRef = doc(db, "posts", postId);
+      const commentForChange = await getDoc(docRef).then(
+        doc => doc.data().comments
+      );
+      let updatedComments = [];
+
+      commentForChange.forEach(comment => {
+        updatedComments.push({
+          ...comment,
+        });
+      });
+      updatedComments[commentId].value = commentValue;
+
+      await updateDoc(docRef, {
+        comments: updatedComments,
       });
 
-      // return { commentId, commentValue };
+      return { postId, commentId, commentValue };
     } catch (error) {
       throw error;
     }
@@ -174,7 +216,10 @@ export const fetchPosts = createAsyncThunk(
           if (commentUserDoc.exists()) {
             comment.user = commentUserDoc.data();
           }
+          comment.createdAt = comment.createdAt.toDate().toLocaleString();
         }
+
+        post.createdAt = post.createdAt.toDate().toLocaleString();
 
         post.comments = comments; // Update the post's comments array with fetched data
         posts.push(post);
@@ -193,6 +238,7 @@ export const deletePost = createAsyncThunk(
     try {
       const postDocRef = doc(db, "posts", postId);
       await deleteDoc(postDocRef);
+
       return postId;
     } catch (error) {
       throw error;
@@ -206,14 +252,16 @@ export const deleteComment = createAsyncThunk(
     try {
       // Extract the necessary data from commentData
       const { postId, commentId } = commentData;
-      console.log(postId, commentId);
+
       // Remove the comment from the specific post document
-      const docRef = await doc(db, "posts", postId);
+      const docRef = doc(db, "posts", postId);
       const comForDelete = await getDoc(docRef).then(doc => doc.data());
 
       await updateDoc(doc(db, "posts", postId), {
         comments: arrayRemove(comForDelete.comments[commentId]),
       });
+
+      return { postId, commentId };
     } catch (error) {
       throw error;
     }

@@ -7,17 +7,19 @@ import {
 import {
   DocumentIcon,
   PaperAirplaneIcon,
+  PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUserData } from "../store/user/userSlice";
-import { formatDateTime } from "../helpers/functions";
 import PostComment from "./PostComment";
+import Modal from "./Modal";
 
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
   const user = useSelector(selectUserData);
   const [comment, setComment] = useState("");
+  const [display, setDisplay] = useState(false);
 
   const handleDelete = postId => {
     dispatch(deletePost(postId));
@@ -34,6 +36,16 @@ const Post = ({ postData }) => {
 
   return (
     <div className="flex flex-col gap-4">
+      {display && (
+        <Modal
+          type={"post"}
+          isOpen={display}
+          index={""}
+          itemId={postData.id}
+          data={postData}
+          onClose={() => setDisplay(false)}
+        />
+      )}
       <div className="flex gap-3 items-center">
         <img
           className="w-11 h-11 rounded-md"
@@ -49,15 +61,19 @@ const Post = ({ postData }) => {
               <p className="text-sm text-gray-500">{postData.user.email}</p>
             </div>
             <div className="text-xs text-gray-500">
-              <div>{formatDateTime(postData.createdAt)}</div>
+              <div>{postData.createdAt}</div>
               <div className="text-right">
                 {user.uid === postData.user.uid && (
-                  <>
+                  <div className="flex gap-2">
+                    <PencilSquareIcon
+                      className="h-5 w-5 hover:cursor-pointer"
+                      onClick={() => setDisplay(true)}
+                    />
                     <TrashIcon
                       className="h-5 w-5 hover:cursor-pointer"
                       onClick={() => handleDelete(postData.id)}
                     />
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -102,19 +118,20 @@ const Post = ({ postData }) => {
           })}
       </div>
       <div>
-        {!postData?.comments
-          ? "Nema komentara"
+        {postData?.comments.length === 0
+          ? "Objava nema komentara"
           : postData.comments.map((item, index) => {
               return (
                 <PostComment
                   key={index}
-                  comments={item}
+                  index={index}
+                  itemId={postData.id}
+                  comment={item}
                   handleCommentDelete={() =>
                     dispatch(
                       deleteComment({ postId: postData.id, commentId: index })
                     )
                   }
-                  handleCommentEdit={() => {}}
                 />
               );
             })}

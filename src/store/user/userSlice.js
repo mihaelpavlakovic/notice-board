@@ -5,6 +5,8 @@ import {
   login,
   logout,
   register,
+  updateProfileInfo,
+  updateProfilePicture,
   uploadImage,
 } from "./userActions";
 
@@ -103,6 +105,30 @@ export const userSlice = createSlice({
         state.userData = payload;
       })
       .addCase(fetchUserById.rejected, (state, { error }) => {
+        state.status = "failed";
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
+      })
+      .addCase(updateProfilePicture.pending, state => {
+        state.status = "loading";
+      })
+      .addCase(updateProfilePicture.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.userData.photoURL = payload;
+      })
+      .addCase(updateProfilePicture.rejected, (state, { error }) => {
+        state.status = "failed";
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
+      })
+      .addCase(updateProfileInfo.pending, state => {
+        state.status = "loading";
+      })
+      .addCase(updateProfileInfo.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.userData.displayName = payload;
+      })
+      .addCase(updateProfileInfo.rejected, (state, { error }) => {
         state.status = "failed";
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
