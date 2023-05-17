@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ function App() {
           </Route>
           <Route element={<Login />} path="/prijava" />
           <Route element={<Register />} path="/registracija" />
+          <Route element={<ResetPassword />} path="/promjena-lozinke" />
           <Route element={<NotFound />} path="/*" />
         </Routes>
       </BrowserRouter>

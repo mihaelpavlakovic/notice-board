@@ -2,12 +2,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/user/userActions";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // component imports
 import Nav from "../layouts/Nav";
 import Card from "../utils/Card";
-import { selectStatus, selectUser } from "../store/user/userSlice";
+import {
+  selectError,
+  selectHasError,
+  selectStatus,
+  selectUser,
+} from "../store/user/userSlice";
 
 const Login = () => {
   const focusElement = useRef();
@@ -16,6 +21,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const status = useSelector(selectStatus);
+  const hasError = useSelector(selectHasError);
+  const error = useSelector(selectError);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +48,11 @@ const Login = () => {
       <Nav />
       <div className="h-[40rem] flex justify-center items-center">
         <Card>
+          {hasError && (
+            <div>
+              <p className="text-red-400 mb-2">{error.errorMessage}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email">Email:</label>
@@ -73,6 +85,12 @@ const Login = () => {
             >
               {status === "loading" ? "U tijeku..." : "Prijava"}
             </button>
+            <Link
+              to="/promjena-lozinke"
+              className="text-indigo-700 hover:underline"
+            >
+              Ponovno postavi lozinku
+            </Link>
           </form>
         </Card>
       </div>

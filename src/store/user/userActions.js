@@ -6,6 +6,7 @@ import { auth, db, storage } from "../../database/firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
@@ -70,6 +71,17 @@ export const login = createAsyncThunk(
       const { user } = await signInWithEmailAndPassword(auth, email, password);
 
       return JSON.stringify(user);
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "user/resetPassword",
+  async email => {
+    try {
+      await sendPasswordResetEmail(auth, email);
     } catch (error) {
       throw error;
     }
