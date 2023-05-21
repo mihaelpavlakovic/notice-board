@@ -76,6 +76,14 @@ const Post = ({ postData }) => {
                     />
                   </div>
                 )}
+                {user?.uid !== postData.user?.uid && user?.isAdmin && (
+                  <div className="flex gap-2">
+                    <TrashIcon
+                      className="h-5 w-5 hover:cursor-pointer"
+                      onClick={() => handleDelete(postData.id)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

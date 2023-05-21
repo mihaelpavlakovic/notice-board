@@ -5,13 +5,16 @@ import React, { useEffect, useRef, useState } from "react";
 import Nav from "../layouts/Nav";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { createPost } from "../store/post/postActions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { resetUploadProgress, selectProgress } from "../store/post/postSlice";
 
 const CreatePost = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const uploadProgress = useSelector(selectProgress);
   const pollOptionRefs = useRef([]);
+  const [displayProgress, setDisplayProgress] = useState(false);
   const [postTitle, setPostTitle] = useState("");
   const [postText, setPostText] = useState("");
   const [files, setFiles] = useState([]);
@@ -70,8 +73,15 @@ const CreatePost = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
+    if (files.length > 0) {
+      setDisplayProgress(true);
+    }
+
     if (selectedValue !== "option1") {
-      dispatch(createPost({ postTitle, postText, files }));
+      dispatch(createPost({ postTitle, postText, files })).then(() => {
+        navigate("/");
+        dispatch(resetUploadProgress());
+      });
     } else {
       if (poll.pollOptions.length > 0) {
         console.log(postTitle, postText, poll);
@@ -81,7 +91,6 @@ const CreatePost = () => {
     setPostTitle("");
     setPostText("");
     setFiles([]);
-    navigate("/");
   };
 
   return (
@@ -101,7 +110,7 @@ const CreatePost = () => {
                 </label>
                 <input
                   id="postTitle"
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-teal-500 focus:ring-teal-500 "
+                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700 "
                   type="text"
                   name="postTitle"
                   value={postTitle}
@@ -117,7 +126,7 @@ const CreatePost = () => {
                 <textarea
                   id="postText"
                   rows="8"
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-teal-500 focus:ring-teal-500"
+                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                   type="text"
                   name="postText"
                   value={postText}
@@ -132,7 +141,7 @@ const CreatePost = () => {
 
                 <input
                   id="fileInput"
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-teal-500 focus:ring-teal-500"
+                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                   type="file"
                   name="fileInput"
                   accept="application/msword, .docx, application/pdf, text/plain, image/*"
@@ -149,7 +158,7 @@ const CreatePost = () => {
                   id="selectValue"
                   value={selectedValue}
                   onChange={handleSelectChange}
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-teal-500 focus:ring-teal-500"
+                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 >
                   <option value="">Dodatak nije odabran</option>
                   <option value="option1">Kreiraj glasanje</option>
@@ -163,7 +172,7 @@ const CreatePost = () => {
                           type="text"
                           placeholder={`Enter poll option ${index + 1}`}
                           value={option}
-                          className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-teal-500 focus:ring-teal-500"
+                          className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                           onChange={event =>
                             handlePollOptionChange(event, index)
                           }
@@ -194,9 +203,18 @@ const CreatePost = () => {
                 )}
               </div>
 
+              {displayProgress && (
+                <div className="h-4 bg-indigo-200 rounded">
+                  <div
+                    className="h-full bg-indigo-600 rounded"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md mt-4"
               >
                 Objavi
               </button>

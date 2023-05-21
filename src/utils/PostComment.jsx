@@ -49,6 +49,14 @@ const PostComment = ({ index, itemId, comment, handleCommentDelete }) => {
                 />
               </div>
             )}
+            {user?.uid !== comment.user?.uid && user?.isAdmin && (
+              <div className="flex gap-2">
+                <TrashIcon
+                  className="h-5 w-5 hover:cursor-pointer"
+                  onClick={handleCommentDelete}
+                />
+              </div>
+            )}
           </div>
         </div>
         <p className="text-gray-500 mt-1">{comment.value}</p>

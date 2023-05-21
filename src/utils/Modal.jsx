@@ -63,6 +63,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                     <input
                       className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
                       type="text"
+                      id="displayName"
                       name="displayName"
                       placeholder="Unesi novo ime..."
                       value={displayName}
@@ -79,6 +80,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                     <input
                       className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
                       type="text"
+                      id="comment"
                       name="comment"
                       placeholder="Unesi svoj novi komentar..."
                       value={commentValue}
@@ -96,6 +98,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       <input
                         className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
                         type="text"
+                        id="postTitle"
                         name="postTitle"
                         placeholder="Unesi svoj novi naslov..."
                         value={postTitleValue}
@@ -110,6 +113,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       <input
                         className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
                         type="text"
+                        id="postText"
                         name="postText"
                         placeholder="Unesi svoj novi opis..."
                         value={postTextValue}

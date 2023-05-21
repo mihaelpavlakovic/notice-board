@@ -20,69 +20,93 @@ import {
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
+import { updateUploadProgress } from "./postSlice";
 
-export const uploadFiles = createAsyncThunk("post/uploadFiles", async file => {
-  try {
-    const storageRef = ref(storage, `postFiles/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+const { v4: uuidv4 } = require("uuid");
 
-    let snapshot;
+function generateId() {
+  return uuidv4();
+}
 
-    uploadTask.on(
-      "state_changed",
-      snap => {
-        snapshot = snap;
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload is ${progress}% done`);
-      },
-      error => {
-        throw error;
-      },
-      () => {
-        // Upload completed successfully, now get download URL
-        getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-          return downloadURL;
-        });
-      }
-    );
+export const uploadFiles = createAsyncThunk(
+  "post/uploadFiles",
+  async ({ files, documentId }, thunkAPI) => {
+    try {
+      const totalBytes = files.reduce((total, file) => total + file.size, 0);
 
-    // Return a promise that resolves with the download URL
-    return new Promise((resolve, reject) => {
-      uploadTask.on("state_changed", null, reject, () => {
-        getDownloadURL(uploadTask.snapshot.ref)
-          .then(downloadURL => {
-            resolve(downloadURL);
-          })
-          .catch(reject);
+      const uploadTasks = files.map(file => {
+        const storageRef = ref(storage, `postFiles/${documentId}/${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        return uploadTask;
       });
-    });
-  } catch (error) {
-    throw error;
+
+      const promises = uploadTasks.map(uploadTask => {
+        return new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            snapshot => {
+              const bytesTransferred = snapshot.bytesTransferred;
+              const progress = (bytesTransferred / totalBytes) * 100;
+              console.log(`Upload is ${progress}% done`);
+
+              thunkAPI.dispatch(updateUploadProgress(progress));
+            },
+            reject,
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref)
+                .then(downloadURL => {
+                  const file = {
+                    downloadURL,
+                    name: uploadTask.snapshot.ref.name,
+                  };
+                  resolve(file);
+                })
+                .catch(reject);
+            }
+          );
+        });
+      });
+
+      const downloadURLs = await Promise.all(promises);
+      thunkAPI.dispatch(updateUploadProgress(100));
+      return downloadURLs;
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 export const createPost = createAsyncThunk(
   "post/createPost",
   async (data, thunkAPI) => {
     try {
-      const userRef = doc(db, "users", thunkAPI.getState().user.userData.uid);
+      const userId = thunkAPI.getState().user.userData.uid;
+      const userRef = doc(db, "users", userId);
+      const documentId = generateId();
       let downloadURLs = [];
-      console.log(data.files);
+
       if (data.files.length > 0) {
         const files = Array.isArray(data.files)
           ? data.files
           : Object.values(data.files);
 
-        for (const file of files) {
-          const downloadURL = await thunkAPI.dispatch(uploadFiles(file));
-          console.log("downloadURL:", downloadURL);
-          downloadURLs.push({
-            downloadURL: downloadURL.payload,
-            documentName: downloadURL.meta.arg.name,
+        const uploadTask = thunkAPI.dispatch(
+          uploadFiles({ files, documentId })
+        );
+
+        const uploadResult = await uploadTask;
+
+        if (uploadResult.payload) {
+          downloadURLs = uploadResult.payload.map(file => {
+            console.log(file);
+            const { downloadURL } = file;
+            const documentName = file.name;
+            return { downloadURL, documentName };
           });
         }
       }
+
       const postData = {
         title: data.postTitle,
         text: data.postText,
@@ -90,9 +114,9 @@ export const createPost = createAsyncThunk(
         files: downloadURLs,
         user: userRef,
       };
-      // Upload the files to Firebase Storage
+
       console.log(postData);
-      addDoc(collection(db, "posts"), postData);
+      await addDoc(collection(db, "posts"), postData);
     } catch (error) {
       throw error;
     }
@@ -146,6 +170,7 @@ export const createComment = createAsyncThunk(
       return {
         postId,
         comment,
+        user: thunkAPI.getState().user.userData,
       };
     } catch (error) {
       throw error;

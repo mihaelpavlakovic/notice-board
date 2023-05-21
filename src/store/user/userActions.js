@@ -11,8 +11,50 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { setCurrentUser } from "./userSlice";
+import { setCurrentUser, updateEmailSent } from "./userSlice";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { updateUploadProgress } from "./userSlice";
+
+export const uploadImage = createAsyncThunk(
+  "user/uploadImage",
+  async (fileData, thunkAPI) => {
+    const { profilePicture, userId } = fileData;
+    try {
+      const fileExtension = profilePicture.name.split(".").pop();
+      const fileName = `${userId}.${fileExtension}`;
+      const storageRef = ref(storage, `profilePictures/${fileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, profilePicture);
+
+      // Create a promise that resolves with the download URL
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          snapshot => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+            thunkAPI.dispatch(updateUploadProgress(progress));
+          },
+          error => {
+            reject(error);
+          },
+          () => {
+            // Upload completed successfully, now get download URL
+            getDownloadURL(uploadTask.snapshot.ref)
+              .then(downloadURL => {
+                resolve(downloadURL);
+              })
+              .catch(error => {
+                reject(error);
+              });
+          }
+        );
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 export const listenAuthState = createAsyncThunk(
   "user/listenAuthState",
@@ -39,7 +81,9 @@ export const register = createAsyncThunk(
       );
 
       // Upload the photo to Firebase Storage
-      const downloadURL = await thunkAPI.dispatch(uploadImage(profilePicture));
+      const downloadURL = await thunkAPI.dispatch(
+        uploadImage({ profilePicture, userId: user.uid })
+      );
 
       // Update the user's display name and photo URL
       await updateProfile(user, {
@@ -78,9 +122,11 @@ export const login = createAsyncThunk(
 
 export const resetPassword = createAsyncThunk(
   "user/resetPassword",
-  async email => {
+  async (email, thunkAPI) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, email).then(() => {
+        thunkAPI.dispatch(updateEmailSent());
+      });
     } catch (error) {
       throw error;
     }
@@ -107,12 +153,14 @@ export const fetchUserById = createAsyncThunk(
 
 export const updateProfilePicture = createAsyncThunk(
   "users/updateProfilePicture",
-  async (photo, thunkAPI) => {
+  async (profilePicture, thunkAPI) => {
     try {
       const user = auth.currentUser;
 
       // Upload the photo to Firebase Storage
-      const downloadURL = await thunkAPI.dispatch(uploadImage(photo));
+      const downloadURL = await thunkAPI.dispatch(
+        uploadImage({ profilePicture, userId: user.uid })
+      );
 
       await updateProfile(user, {
         photoURL: downloadURL.payload,
@@ -159,47 +207,6 @@ export const updateProfileInfo = createAsyncThunk(
 export const logout = createAsyncThunk("auth/logout", async () => {
   try {
     await auth.signOut();
-  } catch (error) {
-    throw error;
-  }
-});
-
-export const uploadImage = createAsyncThunk("user/uploadImage", async file => {
-  try {
-    const storageRef = ref(storage, `profilePictures/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    let snapshot;
-
-    uploadTask.on(
-      "state_changed",
-      snap => {
-        snapshot = snap;
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log(`Upload is ${progress}% done`);
-      },
-      error => {
-        throw error;
-      },
-      () => {
-        // Upload completed successfully, now get download URL
-        getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
-          return downloadURL;
-        });
-      }
-    );
-
-    // Return a promise that resolves with the download URL
-    return new Promise((resolve, reject) => {
-      uploadTask.on("state_changed", null, reject, () => {
-        getDownloadURL(uploadTask.snapshot.ref)
-          .then(downloadURL => {
-            resolve(downloadURL);
-          })
-          .catch(reject);
-      });
-    });
   } catch (error) {
     throw error;
   }

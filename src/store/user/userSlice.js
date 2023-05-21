@@ -19,6 +19,8 @@ export const userSlice = createSlice({
     status: "idle",
     isLoading: true,
     hasError: false,
+    progress: 0,
+    emailSent: false,
     error: {
       errorCode: "",
       errorMessage: "",
@@ -28,6 +30,15 @@ export const userSlice = createSlice({
     setCurrentUser: (state, action) => {
       state.user = action.payload;
       state.isLoading = false;
+    },
+    updateUploadProgress: (state, { payload }) => {
+      state.progress = payload;
+    },
+    resetUploadProgress: state => {
+      state.progress = 0;
+    },
+    updateEmailSent: state => {
+      state.emailSent = true;
     },
   },
   extraReducers(builder) {
@@ -75,8 +86,14 @@ export const userSlice = createSlice({
       .addCase(register.rejected, (state, { error }) => {
         state.status = "failed";
         state.hasError = true;
-        state.error.errorCode = error.code;
-        state.error.errorMessage = error.message;
+        if (error.message.includes("email-already-in-use")) {
+          state.error.errorCode = error.code;
+          state.error.errorMessage =
+            "Korisnički račun sa ovim mailom već postoji.";
+        } else {
+          state.error.errorCode = error.code;
+          state.error.errorMessage = error.message;
+        }
       })
       .addCase(resetPassword.pending, state => {
         state.status = "loading";
@@ -197,7 +214,14 @@ export const selectStatus = state => state.user.status;
 export const selectHasError = state => state.user.hasError;
 export const selectError = state => state.user.error;
 export const selectIsLoading = state => state.user.isLoading;
+export const selectProgress = state => state.user.progress;
+export const selectEmailSent = state => state.user.emailSent;
 
-export const { setCurrentUser } = userSlice.actions;
+export const {
+  setCurrentUser,
+  updateUploadProgress,
+  resetUploadProgress,
+  updateEmailSent,
+} = userSlice.actions;
 
 export default userSlice.reducer;

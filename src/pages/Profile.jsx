@@ -3,14 +3,21 @@ import React, { useRef, useState } from "react";
 // component imports
 import Nav from "../layouts/Nav";
 import { useDispatch, useSelector } from "react-redux";
-import { selectStatus, selectUserData } from "../store/user/userSlice";
+import {
+  resetUploadProgress,
+  selectProgress,
+  selectStatus,
+  selectUserData,
+} from "../store/user/userSlice";
 import { updateProfilePicture } from "../store/user/userActions";
 import Modal from "../utils/Modal";
 
 const Profile = () => {
   const userData = useSelector(selectUserData);
   const status = useSelector(selectStatus);
+  const uploadProgress = useSelector(selectProgress);
   const [display, setDisplay] = useState(false);
+  const [displayProgress, setDisplayProgress] = useState(false);
   const [error, setError] = useState("");
   const [image, setImage] = useState(null);
   const dispatch = useDispatch();
@@ -18,8 +25,10 @@ const Profile = () => {
   const types = ["image/png", "image/jpeg", "image/jpg"];
 
   const reset = () => {
+    setDisplayProgress(false);
     refValue.current.value = "";
     setImage(null);
+    dispatch(resetUploadProgress());
     // dispatch(databaseActions.removeImage());
   };
 
@@ -36,6 +45,7 @@ const Profile = () => {
   };
 
   const uploadImageHandler = () => {
+    setDisplayProgress(true);
     dispatch(updateProfilePicture(image)).then(() => {
       if (status === "succeeded") {
         reset();
@@ -83,6 +93,7 @@ const Profile = () => {
                 )}
                 <input
                   type="file"
+                  id="fileInput"
                   name="fileInput"
                   ref={refValue}
                   onChange={handleSelect}
@@ -90,6 +101,14 @@ const Profile = () => {
                 />
                 {image !== null && (
                   <div className="flex flex-col mt-3">
+                    {displayProgress && (
+                      <div className="h-4 bg-indigo-200 rounded">
+                        <div
+                          className="h-full bg-indigo-600 rounded"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    )}
                     <div className="mt-3 flex flex-col gap-2 md:flex-row justify-between">
                       <button
                         type="button"

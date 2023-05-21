@@ -16,12 +16,20 @@ export const postSlice = createSlice({
     posts: null,
     status: "idle",
     isLoading: true,
+    progress: 0,
     error: {
       errorCode: "",
       errorMessage: "",
     },
   },
-  reducers: {},
+  reducers: {
+    updateUploadProgress: (state, { payload }) => {
+      state.progress = payload;
+    },
+    resetUploadProgress: state => {
+      state.progress = 0;
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(uploadFiles.pending, state => {
@@ -38,13 +46,13 @@ export const postSlice = createSlice({
       .addCase(createPost.pending, state => {
         state.status = "loading";
       })
-      .addCase(createPost.fulfilled, state => {
+      .addCase(createPost.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
       })
       .addCase(createPost.rejected, (state, { error }) => {
         state.status = "failed";
         console.log(error);
-        state.error.errorCode = error.code;
+        state.error.errorCode = error?.code;
         state.error.errorMessage = error.message;
       })
       .addCase(createComment.pending, state => {
@@ -52,7 +60,9 @@ export const postSlice = createSlice({
       })
       .addCase(createComment.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
-        const { postId, comment } = payload;
+        const { postId, comment, user } = payload;
+        comment.createdAt = comment.createdAt.toLocaleString();
+        comment.user = user;
         const post = state.posts.find(post => post.id === postId);
 
         post.comments.push(comment);
@@ -126,7 +136,8 @@ export const selectPosts = state => state.post.posts;
 export const selectStatus = state => state.post.status;
 export const selectIsLoading = state => state.post.isLoading;
 export const selectError = state => state.post.error;
+export const selectProgress = state => state.post.progress;
 
-// export const { some_actions } = postSlice.actions;
+export const { updateUploadProgress, resetUploadProgress } = postSlice.actions;
 
 export default postSlice.reducer;

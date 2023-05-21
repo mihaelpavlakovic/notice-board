@@ -6,7 +6,12 @@ import { register } from "../store/user/userActions";
 // component imports
 import Nav from "../layouts/Nav";
 import Card from "../utils/Card";
-import { selectStatus, selectUser } from "../store/user/userSlice";
+import {
+  selectError,
+  selectHasError,
+  selectStatus,
+  selectUser,
+} from "../store/user/userSlice";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
@@ -16,7 +21,12 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const fileInputRef = useRef(null);
+  const hasError = useSelector(selectHasError);
+  const error = useSelector(selectError);
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const status = useSelector(selectStatus);
@@ -35,13 +45,44 @@ const Register = () => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    dispatch(register({ email, password, name, profilePicture }));
-    setEmail("");
-    setPassword("");
-    setPasswordConfirm("");
-    setName("");
-    setProfilePicture("");
-    fileInputRef.current.value = null;
+    let isValid = true;
+
+    // Reset error messages
+    setNameError("");
+    setPasswordError("");
+    setConfirmPasswordError("");
+
+    // Name validation
+    if (name.length > 40) {
+      setNameError("Ime i prezime ne smije biti duže od 40 znakova.");
+      isValid = false;
+    }
+
+    // Password validation
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setPasswordError(
+        "Lozinka mora sadržavati najmanje 8 znakova, jedno veliko slovo, jedno malo slovo i jedan broj."
+      );
+      isValid = false;
+    }
+
+    // Password validation
+    if (password !== passwordConfirm) {
+      setConfirmPasswordError("Lozinke se ne podudaraju.");
+      isValid = false;
+    }
+
+    if (isValid) {
+      dispatch(register({ email, password, name, profilePicture }));
+      setEmail("");
+      setPassword("");
+      setPasswordConfirm("");
+      setName("");
+      setProfilePicture("");
+      fileInputRef.current.value = null;
+    }
   };
 
   return (
@@ -50,6 +91,11 @@ const Register = () => {
 
       <div className="h-[40rem] flex justify-center items-center">
         <Card>
+          {hasError && (
+            <div>
+              <p className="text-red-400 mb-2">{error.errorMessage}</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email">Email:</label>
@@ -75,6 +121,7 @@ const Register = () => {
                 type="text"
                 required
               />
+              {nameError && <span className="text-red-500">{nameError}</span>}
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="profilePicture">Odaberi sliku profila:</label>
@@ -104,6 +151,7 @@ const Register = () => {
                 ref={fileInputRef}
                 onChange={e => setProfilePicture(e.target.files[0])}
                 accept="image/*"
+                required
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -119,6 +167,9 @@ const Register = () => {
                 // pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                 // title="Mora sadržavati najmanje jedan broj i jedno veliko i malo slovo te najmanje 8 ili više znakova"
               />
+              {passwordError && (
+                <span className="text-red-500">{passwordError}</span>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="passwordConfirm">Potvrdi lozinku:</label>
@@ -133,6 +184,9 @@ const Register = () => {
                 // pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                 // title="Mora sadržavati najmanje jedan broj i jedno veliko i malo slovo te najmanje 8 ili više znakova"
               />
+              {confirmPasswordError && (
+                <span className="text-red-500">{confirmPasswordError}</span>
+              )}
             </div>
 
             <button

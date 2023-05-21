@@ -4,13 +4,14 @@ import Nav from "../layouts/Nav";
 import Card from "../utils/Card";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPassword } from "../store/user/userActions";
-import { selectStatus } from "../store/user/userSlice";
+import { selectEmailSent, selectStatus } from "../store/user/userSlice";
 
 const ResetPassword = () => {
   const focusElement = useRef();
   const [email, setEmail] = useState("");
   const dispatch = useDispatch();
   const status = useSelector(selectStatus);
+  const emailSent = useSelector(selectEmailSent);
 
   useEffect(() => {
     focusElement.current.focus();
@@ -31,6 +32,11 @@ const ResetPassword = () => {
             <div className="text-gray-700 p-5 sm:p-10 md:p-20">
               <h1 className="text-3xl pb-2">Ponovno postavite vašu lozinku</h1>
               <div className="mt-6">
+                {emailSent && (
+                  <p className="text-indigo-700 mb-2">
+                    Uspješno je poslan mail. Provjerite ulaznu poštu.
+                  </p>
+                )}
                 <div className="pb-4">
                   <label htmlFor="email">Email:</label>
                   <input
