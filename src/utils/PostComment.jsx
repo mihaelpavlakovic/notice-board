@@ -37,7 +37,7 @@ const PostComment = ({ index, itemId, comment, handleCommentDelete }) => {
           </h3>
           <div className="text-xs text-gray-500 text-right">
             <div>{comment.createdAt}</div>
-            {user.uid === comment.user.uid && (
+            {user?.uid === comment.user?.uid && (
               <div className="flex gap-2">
                 <PencilSquareIcon
                   className="h-5 w-5 hover:cursor-pointer"

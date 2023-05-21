@@ -48,7 +48,6 @@ export const register = createAsyncThunk(
       });
 
       const docRef = doc(db, "users", user.uid);
-      console.log("docRef:", docRef);
       await setDoc(docRef, {
         uid: user.uid,
         displayName: name,

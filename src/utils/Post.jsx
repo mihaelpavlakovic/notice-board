@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUserData } from "../store/user/userSlice";
 import PostComment from "./PostComment";
 import Modal from "./Modal";
+import Picture from "./Picture";
 
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
@@ -58,12 +59,12 @@ const Post = ({ postData }) => {
               <h3 className="flex-auto font-semibold flex items-center">
                 {postData.user?.displayName}
               </h3>
-              <p className="text-sm text-gray-500">{postData.user.email}</p>
+              <p className="text-sm text-gray-500">{postData.user?.email}</p>
             </div>
             <div className="text-xs text-gray-500">
               <div>{postData.createdAt}</div>
               <div className="text-right">
-                {user.uid === postData.user.uid && (
+                {user?.uid === postData.user?.uid && (
                   <div className="flex gap-2">
                     <PencilSquareIcon
                       className="h-5 w-5 hover:cursor-pointer"
@@ -107,11 +108,10 @@ const Post = ({ postData }) => {
               );
             } else {
               return (
-                <img
+                <Picture
                   key={index}
                   src={item[1].downloadURL}
                   alt={`Slika ${index}`}
-                  className="w-20"
                 />
               );
             }

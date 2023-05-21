@@ -1,5 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import { db, storage } from "../../database/firebase";
 import {
   addDoc,
@@ -237,6 +242,20 @@ export const deletePost = createAsyncThunk(
   async (postId, thunkAPI) => {
     try {
       const postDocRef = doc(db, "posts", postId);
+      const postDoc = await getDoc(postDocRef);
+      const postData = postDoc.data();
+
+      // Check if there are links to Firestore documents in the post
+      if (postData && postData.files && postData.files.length > 0) {
+        const fileDeletionPromises = postData.files.map(async file => {
+          // Delete the file from Firebase Storage
+          const fileStorageRef = ref(storage, file.downloadURL);
+          await deleteObject(fileStorageRef);
+        });
+
+        // Wait for all file deletions to complete
+        await Promise.all(fileDeletionPromises);
+      }
       await deleteDoc(postDocRef);
 
       return postId;
