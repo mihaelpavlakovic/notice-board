@@ -5,7 +5,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { db, storage } from "../../database/firebase";
+import { auth, db, storage } from "../../database/firebase";
 import {
   addDoc,
   arrayRemove,
@@ -154,7 +154,8 @@ export const createComment = createAsyncThunk(
     try {
       // Extract the necessary data from commentData
       const { postId, commentValue } = commentData;
-      const userRef = doc(db, "users", thunkAPI.getState().user.userData.uid);
+      const userId = auth.currentUser.uid;
+      const userRef = doc(db, "users", userId);
       // Create a new comment object
       const comment = {
         value: commentValue,
@@ -170,7 +171,7 @@ export const createComment = createAsyncThunk(
       return {
         postId,
         comment,
-        user: thunkAPI.getState().user.userData,
+        user: thunkAPI.getState().user.user,
       };
     } catch (error) {
       throw error;

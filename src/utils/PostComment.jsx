@@ -22,18 +22,13 @@ const PostComment = ({ index, itemId, comment, handleCommentDelete }) => {
       )}
       <img
         className="w-8 h-8 rounded-md mt-1"
-        src={comment.user.photoURL}
+        src={comment.user?.photoURL}
         alt="Profilna slika korisnika"
       />
       <div className="w-full">
         <div className="flex items-start flex-nowrap">
           <h3 className="flex-auto font-semibold">
-            {comment.user.displayName}
-            {comment.user.isMentor && (
-              <span className="text-xs font-normal ml-2 bg-gray-200 px-2 py-1 rounded-full">
-                mentor
-              </span>
-            )}
+            {comment.user?.displayName}
           </h3>
           <div className="text-xs text-gray-500 text-right">
             <div>{comment.createdAt}</div>

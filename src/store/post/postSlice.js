@@ -62,7 +62,7 @@ export const postSlice = createSlice({
         state.status = "succeeded";
         const { postId, comment, user } = payload;
         comment.createdAt = comment.createdAt.toLocaleString();
-        comment.user = user;
+        comment.user = JSON.parse(user);
         const post = state.posts.find(post => post.id === postId);
 
         post.comments.push(comment);
@@ -70,7 +70,7 @@ export const postSlice = createSlice({
       .addCase(createComment.rejected, (state, { error }) => {
         state.status = "failed";
         console.log(error);
-        state.error.errorCode = error.code;
+        state.error.errorCode = error?.code;
         state.error.errorMessage = error.message;
       })
       .addCase(updateComment.pending, state => {
