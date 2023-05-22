@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserData } from "../store/user/userSlice";
+import { selectUser } from "../store/user/userSlice";
 import { updateProfileInfo } from "../store/user/userActions";
 import { updateComment, updatePost } from "../store/post/postActions";
 
 const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
-  const user = useSelector(selectUserData);
+  const user = JSON.parse(useSelector(selectUser));
   const [displayName, setDisplayName] = useState(user?.displayName);
   const [commentValue, setCommentValue] = useState(data.value);
   const [postTitleValue, setPostTitleValue] = useState(data.title);

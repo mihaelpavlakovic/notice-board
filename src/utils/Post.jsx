@@ -11,14 +11,14 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserData } from "../store/user/userSlice";
+import { selectUser } from "../store/user/userSlice";
 import PostComment from "./PostComment";
 import Modal from "./Modal";
 import Picture from "./Picture";
 
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
-  const user = useSelector(selectUserData);
+  const user = JSON.parse(useSelector(selectUser));
   const [comment, setComment] = useState("");
   const [display, setDisplay] = useState(false);
 
@@ -27,7 +27,10 @@ const Post = ({ postData }) => {
   };
   const handleSubmit = e => {
     e.preventDefault();
-    dispatch(createComment({ postId: postData.id, commentValue: comment }));
+
+    if (comment.trim() !== "") {
+      dispatch(createComment({ postId: postData.id, commentValue: comment }));
+    }
 
     setComment("");
   };

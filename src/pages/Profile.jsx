@@ -7,13 +7,13 @@ import {
   resetUploadProgress,
   selectProgress,
   selectStatus,
-  selectUserData,
+  selectUser,
 } from "../store/user/userSlice";
 import { updateProfilePicture } from "../store/user/userActions";
 import Modal from "../utils/Modal";
 
 const Profile = () => {
-  const userData = useSelector(selectUserData);
+  const userData = JSON.parse(useSelector(selectUser));
   const status = useSelector(selectStatus);
   const uploadProgress = useSelector(selectProgress);
   const [display, setDisplay] = useState(false);

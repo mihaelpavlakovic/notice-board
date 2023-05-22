@@ -77,7 +77,7 @@ const CreatePost = () => {
       setDisplayProgress(true);
     }
 
-    if (selectedValue !== "option1") {
+    if (selectedValue !== "option1" && postTitle.trim() !== "") {
       dispatch(createPost({ postTitle, postText, files })).then(() => {
         navigate("/");
         dispatch(resetUploadProgress());

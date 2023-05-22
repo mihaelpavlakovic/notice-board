@@ -81,7 +81,7 @@ export const createPost = createAsyncThunk(
   "post/createPost",
   async (data, thunkAPI) => {
     try {
-      const userId = thunkAPI.getState().user.userData.uid;
+      const userId = auth.currentUser.uid;
       const userRef = doc(db, "users", userId);
       const documentId = generateId();
       let downloadURLs = [];
