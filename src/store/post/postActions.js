@@ -216,6 +216,26 @@ export const updatePost = createAsyncThunk(
   }
 );
 
+// export const deleteDocument = createAsyncThunk(
+//   "post/deleteDocument",
+//   async ({ documentId }, thunkAPI) => {
+//     try {
+//       // Delete the document from Firebase Storage
+//       await deleteObject(ref(storage, `documents/${documentId}`));
+
+//       // Remove the reference to the document from the specific document
+//       const postRef = doc(db, "posts", documentId);
+//       await updateDoc(postRef, {
+//         documentUrl: null,
+//       });
+
+//       return documentId;
+//     } catch (error) {
+//       throw error;
+//     }
+//   }
+// );
+
 export const createComment = createAsyncThunk(
   "post/createComment",
   async (commentData, thunkAPI) => {

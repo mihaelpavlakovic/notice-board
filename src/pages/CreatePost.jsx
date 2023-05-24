@@ -67,7 +67,14 @@ const CreatePost = () => {
       setDisplayProgress(true);
     }
 
-    if (postTitle.trim() !== "" && pollOptions.length > 1) {
+    if (postTitle.trim() !== "" && selectedValue !== "option1") {
+      dispatch(createPost({ postTitle, postText, files, pollOptions })).then(
+        () => {
+          navigate("/");
+          dispatch(resetUploadProgress());
+        }
+      );
+    } else if (pollOptions.length > 1) {
       dispatch(createPost({ postTitle, postText, files, pollOptions })).then(
         () => {
           navigate("/");

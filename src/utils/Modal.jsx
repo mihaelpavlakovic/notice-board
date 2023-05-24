@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "../store/user/userSlice";
 import { updateProfileInfo } from "../store/user/userActions";
 import { updateComment, updatePost } from "../store/post/postActions";
+import { DocumentIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
   const user = JSON.parse(useSelector(selectUser));
@@ -26,6 +27,10 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
 
   const newPostTextValue = e => {
     setPostTextValue(e.target.value);
+  };
+
+  const deleteHandler = e => {
+    console.log("delete");
   };
 
   const handleSubmit = async e => {
@@ -119,6 +124,48 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                         value={postTextValue}
                         onChange={newPostTextValue}
                       />
+                    </div>
+                    <div className="pb-4">
+                      {data.files.length !== 0 &&
+                        Object.entries(data.files).map((item, index) => {
+                          if (
+                            item[1].documentName.includes(".pdf") ||
+                            item[1].documentName.includes(".txt") ||
+                            item[1].documentName.includes(".docx") ||
+                            item[1].documentName.includes(".doc")
+                          ) {
+                            return (
+                              <a
+                                key={index}
+                                href={item[1].downloadURL}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="bg-gray-200 flex gap-3 items-center grow p-3 hover:bg-gray-300 hover:cursor-pointer"
+                              >
+                                <DocumentIcon className="h-5 w-5 hover:cursor-pointer" />
+                                {item[1].documentName}
+                              </a>
+                            );
+                          } else {
+                            return (
+                              <div className="relative">
+                                <img
+                                  key={index}
+                                  src={item[1].downloadURL}
+                                  alt={`Slika ${index}`}
+                                  className="w-[7rem]"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={deleteHandler}
+                                  className="absolute top-0 right-0 p-1 bg-red-500 rounded-full text-white"
+                                >
+                                  <XMarkIcon className="h-4 w-4" />
+                                </button>
+                              </div>
+                            );
+                          }
+                        })}
                     </div>
                   </>
                 )}

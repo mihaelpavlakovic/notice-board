@@ -9,6 +9,7 @@ import {
   updateComment,
   updatePost,
   handleVote,
+  deleteDocument,
 } from "./postActions";
 
 export const postSlice = createSlice({
@@ -130,6 +131,18 @@ export const postSlice = createSlice({
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
+      // .addCase(deleteDocument.pending, state => {
+      //   state.status = "loading";
+      // })
+      // .addCase(deleteDocument.fulfilled, (state, { payload }) => {
+      //   state.status = "succeeded";
+      // })
+      // .addCase(deleteDocument.rejected, (state, { error }) => {
+      //   state.status = "failed";
+      //   console.log(error);
+      //   state.error.errorCode = error.code;
+      //   state.error.errorMessage = error.message;
+      // })
       .addCase(fetchPosts.pending, state => {
         state.status = "loading";
         state.error = null;
