@@ -3,6 +3,7 @@ import {
   createComment,
   deleteComment,
   deletePost,
+  handleVote,
 } from "../store/post/postActions";
 import {
   DocumentIcon,
@@ -11,7 +12,7 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUser } from "../store/user/userSlice";
+import { selectUser, selectUserData } from "../store/user/userSlice";
 import PostComment from "./PostComment";
 import Modal from "./Modal";
 import Picture from "./Picture";
@@ -19,6 +20,7 @@ import Picture from "./Picture";
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
   const user = JSON.parse(useSelector(selectUser));
+  const userData = useSelector(selectUserData);
   const [comment, setComment] = useState("");
   const [display, setDisplay] = useState(false);
 
@@ -36,6 +38,10 @@ const Post = ({ postData }) => {
   };
   const handleChange = e => {
     setComment(e.target.value);
+  };
+
+  const handleVoteAction = (postId, optionIndex) => {
+    dispatch(handleVote({ postId, optionIndex }));
   };
 
   return (
@@ -79,7 +85,7 @@ const Post = ({ postData }) => {
                     />
                   </div>
                 )}
-                {user?.uid !== postData.user?.uid && user?.isAdmin && (
+                {user?.uid !== postData.user?.uid && userData?.isAdmin && (
                   <div className="flex gap-2">
                     <TrashIcon
                       className="h-5 w-5 hover:cursor-pointer"
@@ -96,6 +102,37 @@ const Post = ({ postData }) => {
         <h2 className="text-2xl font-semibold">{postData.title}</h2>
       </div>
       <p className="text-gray-500">{postData.text}</p>
+      {postData?.pollOptions && (
+        <ul className="space-y-4">
+          {postData.pollOptions.map((option, index) => (
+            <li key={index} className="flex items-center">
+              <div className="flex-grow">
+                <span className="text-lg font-semibold">{option.name}</span>
+              </div>
+              <div className="w-48 h-2 bg-gray-300 rounded-full mx-4">
+                <div
+                  className="h-full bg-indigo-600 rounded-full"
+                  style={{ width: `${(option.votes / 10) * 100}%` }}
+                ></div>
+              </div>
+              <div className="w-16 text-center">
+                <span className="text-lg font-semibold">{option.votes}</span>
+              </div>
+              <button
+                onClick={() => handleVoteAction(postData.id, index)}
+                disabled={postData?.totalVotedUsers?.includes(user.uid)}
+                className={`py-1 px-2 rounded ${
+                  !postData?.totalVotedUsers?.includes(user.uid)
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+                    : "bg-indigo-600 bg-opacity-80 text-white font-semibold"
+                }`}
+              >
+                Vote
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="flex flex-wrap gap-2 overflow-hidden">
         {postData.files.length !== 0 &&
           Object.entries(postData.files).map((item, index) => {

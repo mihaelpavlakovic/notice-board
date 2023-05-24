@@ -19,39 +19,29 @@ const CreatePost = () => {
   const [postText, setPostText] = useState("");
   const [files, setFiles] = useState([]);
   const [selectedValue, setSelectedValue] = useState("");
-  const [poll, setPoll] = useState({
-    pollOptions: [],
-    votes: [],
-  });
-
-  const handleAddPollOption = () => {
-    setPoll(prevPost => {
-      return {
-        ...prevPost,
-        pollOptions: [...prevPost.pollOptions, ""],
-      };
-    });
-  };
-
-  const handlePollOptionChange = (event, index) => {
-    const updatedPollOptions = [...poll.pollOptions];
-    updatedPollOptions[index] = event.target.value;
-    setPoll({ ...poll, pollOptions: updatedPollOptions });
-  };
+  const [pollOptions, setPollOptions] = useState([]);
 
   const handleSelectChange = event => {
     setSelectedValue(event.target.value);
   };
 
+  const handleAddPollOption = () => {
+    setPollOptions(prevOptions => [
+      ...prevOptions,
+      { name: "", votes: 0, votedUsers: [] },
+    ]);
+  };
+
+  const handlePollOptionChange = (event, index) => {
+    const updatedOptions = [...pollOptions];
+    updatedOptions[index].name = event.target.value;
+    setPollOptions(updatedOptions);
+  };
+
   const handleRemovePollOption = index => {
-    setPoll(prevPost => {
-      const updatedPollOptions = [...prevPost.pollOptions];
-      updatedPollOptions.splice(index, 1);
-      return {
-        ...prevPost,
-        pollOptions: updatedPollOptions,
-      };
-    });
+    const updatedOptions = [...pollOptions];
+    updatedOptions.splice(index, 1);
+    setPollOptions(updatedOptions);
   };
 
   const handlePollOptionKeyPress = (event, index) => {
@@ -69,7 +59,7 @@ const CreatePost = () => {
         lastInput.focus();
       }
     }
-  }, [poll.pollOptions]);
+  }, [pollOptions]);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -77,15 +67,13 @@ const CreatePost = () => {
       setDisplayProgress(true);
     }
 
-    if (selectedValue !== "option1" && postTitle.trim() !== "") {
-      dispatch(createPost({ postTitle, postText, files })).then(() => {
-        navigate("/");
-        dispatch(resetUploadProgress());
-      });
-    } else {
-      if (poll.pollOptions.length > 0) {
-        console.log(postTitle, postText, poll);
-      }
+    if (postTitle.trim() !== "" && pollOptions.length > 1) {
+      dispatch(createPost({ postTitle, postText, files, pollOptions })).then(
+        () => {
+          navigate("/");
+          dispatch(resetUploadProgress());
+        }
+      );
     }
 
     setPostTitle("");
@@ -166,12 +154,12 @@ const CreatePost = () => {
 
                 {selectedValue === "option1" && (
                   <div className="mt-2 flex flex-col gap-2">
-                    {poll.pollOptions.map((option, index) => (
+                    {pollOptions.map((option, index) => (
                       <div key={index} className="flex items-center">
                         <input
                           type="text"
                           placeholder={`Enter poll option ${index + 1}`}
-                          value={option}
+                          value={option.name} // Update this line
                           className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                           onChange={event =>
                             handlePollOptionChange(event, index)
@@ -183,6 +171,7 @@ const CreatePost = () => {
                             (pollOptionRefs.current[index] = inputRef)
                           }
                         />
+
                         <button
                           type="button"
                           className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 ml-2 rounded-md"

@@ -85,6 +85,7 @@ export const createPost = createAsyncThunk(
       const userRef = doc(db, "users", userId);
       const documentId = generateId();
       let downloadURLs = [];
+      let postData = {};
 
       if (data.files.length > 0) {
         const files = Array.isArray(data.files)
@@ -107,16 +108,83 @@ export const createPost = createAsyncThunk(
         }
       }
 
-      const postData = {
-        title: data.postTitle,
-        text: data.postText,
-        createdAt: Timestamp.fromDate(new Date()).toDate(),
-        files: downloadURLs,
-        user: userRef,
-      };
+      if (data.pollOptions.length > 0) {
+        postData = {
+          title: data.postTitle,
+          text: data.postText,
+          createdAt: Timestamp.fromDate(new Date()).toDate(),
+          files: downloadURLs,
+          user: userRef,
+          pollOptions: data.pollOptions,
+          totalVotedUsers: [],
+        };
+      } else {
+        postData = {
+          title: data.postTitle,
+          text: data.postText,
+          createdAt: Timestamp.fromDate(new Date()).toDate(),
+          files: downloadURLs,
+          user: userRef,
+        };
+      }
 
       console.log(postData);
       await addDoc(collection(db, "posts"), postData);
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const handleVote = createAsyncThunk(
+  "post/handleVote",
+  async ({ postId, optionIndex }, thunkAPI) => {
+    try {
+      const userId = auth.currentUser.uid;
+      const state = thunkAPI.getState();
+      const { posts } = state.post;
+
+      const updatedPosts = posts.map(post => {
+        if (post.id === postId) {
+          // Check if the user has already voted in the poll
+          if (!post.totalVotedUsers.includes(userId)) {
+            const pollOptions = post.pollOptions.map((option, index) => {
+              if (index === optionIndex) {
+                return {
+                  ...option,
+                  votes: option.votes + 1,
+                  votedUsers: [...option.votedUsers, userId],
+                };
+              }
+              return option;
+            });
+
+            const totalVotedUsers = [...post.totalVotedUsers, userId];
+
+            return {
+              ...post,
+              pollOptions,
+              totalVotedUsers,
+            };
+          }
+        }
+        return post;
+      });
+
+      const updatedPost = updatedPosts.find(post => post.id === postId);
+
+      // Perform the necessary database update if required
+      const postRef = doc(db, "posts", postId);
+      await updateDoc(postRef, {
+        pollOptions: updatedPost.pollOptions,
+        totalVotedUsers: updatedPost.totalVotedUsers,
+      });
+
+      return {
+        postId,
+        pollOptions: updatedPost.pollOptions,
+        totalVotedUsers: updatedPost.totalVotedUsers,
+      };
     } catch (error) {
       throw error;
     }

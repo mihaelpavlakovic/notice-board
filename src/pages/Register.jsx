@@ -7,8 +7,10 @@ import { register } from "../store/user/userActions";
 import Nav from "../layouts/Nav";
 import Card from "../utils/Card";
 import {
+  resetUploadProgress,
   selectError,
   selectHasError,
+  selectProgress,
   selectStatus,
   selectUser,
 } from "../store/user/userSlice";
@@ -31,16 +33,35 @@ const Register = () => {
   const user = useSelector(selectUser);
   const status = useSelector(selectStatus);
   const navigate = useNavigate();
+  const uploadProgress = useSelector(selectProgress);
+  const [displayProgress, setDisplayProgress] = useState(false);
+  const [imageTypeError, setImageTypeError] = useState("");
+  const types = ["image/png", "image/jpeg", "image/jpg"];
 
   useEffect(() => {
-    if (user) {
+    if (user && status === "succeeded" && uploadProgress === 100) {
       navigate("/");
+      dispatch(resetUploadProgress());
     }
-  }, [user, navigate]);
+  }, [user, status, uploadProgress, navigate, dispatch]);
 
   useEffect(() => {
     focusElement.current.focus();
   }, []);
+
+  const handleSelect = e => {
+    let selected = e.target.files[0];
+
+    if (selected && types.includes(selected.type)) {
+      setProfilePicture(selected);
+      setImageTypeError("");
+    } else {
+      setImageTypeError("Odaberite sliku formata .png, .jpeg ili .jpg");
+      fileInputRef.current.value = "";
+      setProfilePicture("");
+      dispatch(resetUploadProgress());
+    }
+  };
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -75,6 +96,7 @@ const Register = () => {
     }
 
     if (isValid) {
+      setDisplayProgress(true);
       dispatch(register({ email, password, name, profilePicture }));
       setEmail("");
       setPassword("");
@@ -143,13 +165,18 @@ const Register = () => {
                   </button>
                 </div>
               )}
+              {imageTypeError && (
+                <p className="bg-red-500 text-white rounded p-2 mt-2 text-sm">
+                  {imageTypeError}
+                </p>
+              )}
               <input
                 className="w-full border rounded-md p-2"
                 type="file"
                 id="profilePicture"
                 name="profilePicture"
                 ref={fileInputRef}
-                onChange={e => setProfilePicture(e.target.files[0])}
+                onChange={handleSelect}
                 accept="image/*"
                 required
               />
@@ -181,13 +208,20 @@ const Register = () => {
                 onChange={e => setPasswordConfirm(e.target.value)}
                 type="password"
                 required
-                // pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                // title="Mora sadržavati najmanje jedan broj i jedno veliko i malo slovo te najmanje 8 ili više znakova"
               />
               {confirmPasswordError && (
                 <span className="text-red-500">{confirmPasswordError}</span>
               )}
             </div>
+
+            {displayProgress && (
+              <div className="h-4 bg-indigo-200 rounded">
+                <div
+                  className="h-full bg-indigo-600 rounded"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            )}
 
             <button
               type="submit"

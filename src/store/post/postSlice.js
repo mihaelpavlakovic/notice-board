@@ -8,6 +8,7 @@ import {
   deleteComment,
   updateComment,
   updatePost,
+  handleVote,
 } from "./postActions";
 
 export const postSlice = createSlice({
@@ -53,6 +54,29 @@ export const postSlice = createSlice({
         state.status = "failed";
         console.log(error);
         state.error.errorCode = error?.code;
+        state.error.errorMessage = error.message;
+      })
+      .addCase(handleVote.pending, state => {
+        state.status = "loading";
+      })
+      .addCase(handleVote.fulfilled, (state, { payload }) => {
+        const { postId, pollOptions, totalVotedUsers } = payload;
+
+        // Find the specific post in the state by postId
+        const post = state.posts.find(p => p.id === postId);
+
+        if (post) {
+          // Update the pollOptions in the post
+          post.pollOptions = pollOptions;
+          post.totalVotedUsers = totalVotedUsers;
+        }
+
+        state.status = "succeeded";
+      })
+      .addCase(handleVote.rejected, (state, { error }) => {
+        state.status = "failed";
+        console.log(error);
+        state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
       .addCase(createComment.pending, state => {
