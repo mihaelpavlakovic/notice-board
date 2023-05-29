@@ -134,7 +134,7 @@ export const resetPassword = createAsyncThunk(
 );
 
 export const fetchUserById = createAsyncThunk(
-  "users/fetchUserById",
+  "user/fetchUserById",
   async userId => {
     try {
       const userDocRef = doc(db, "users", userId);
@@ -152,7 +152,7 @@ export const fetchUserById = createAsyncThunk(
 );
 
 export const updateProfilePicture = createAsyncThunk(
-  "users/updateProfilePicture",
+  "user/updateProfilePicture",
   async (profilePicture, thunkAPI) => {
     try {
       const user = auth.currentUser;
@@ -180,7 +180,7 @@ export const updateProfilePicture = createAsyncThunk(
 );
 
 export const updateProfileInfo = createAsyncThunk(
-  "users/updateProfileInfo",
+  "user/updateProfileInfo",
   async (displayName, thunkAPI) => {
     try {
       // Get the currently logged-in user

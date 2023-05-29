@@ -24,7 +24,7 @@ import { updateUploadProgress } from "./postSlice";
 
 const { v4: uuidv4 } = require("uuid");
 
-function generateId() {
+export function generateId() {
   return uuidv4();
 }
 
@@ -32,6 +32,7 @@ export const uploadFiles = createAsyncThunk(
   "post/uploadFiles",
   async ({ files, documentId }, thunkAPI) => {
     try {
+      console.log(files, documentId);
       const totalBytes = files.reduce((total, file) => total + file.size, 0);
 
       const uploadTasks = files.map(file => {
@@ -58,7 +59,7 @@ export const uploadFiles = createAsyncThunk(
                 .then(downloadURL => {
                   const file = {
                     downloadURL,
-                    name: uploadTask.snapshot.ref.name,
+                    documentName: uploadTask.snapshot.ref.name,
                   };
                   resolve(file);
                 })
@@ -113,6 +114,7 @@ export const createPost = createAsyncThunk(
           title: data.postTitle,
           text: data.postText,
           createdAt: Timestamp.fromDate(new Date()).toDate(),
+          documentId: data.files.length > 0 ? documentId : "",
           files: downloadURLs,
           user: userRef,
           pollOptions: data.pollOptions,
@@ -123,6 +125,7 @@ export const createPost = createAsyncThunk(
           title: data.postTitle,
           text: data.postText,
           createdAt: Timestamp.fromDate(new Date()).toDate(),
+          documentId: data.files.length > 0 ? documentId : "",
           files: downloadURLs,
           user: userRef,
         };
@@ -195,20 +198,35 @@ export const updatePost = createAsyncThunk(
   "post/updatePost",
   async (postData, thunkAPI) => {
     try {
-      const { postId, title, text } = postData;
+      const { postId, title, text, files, documentId } = postData;
+      console.log("files:", files);
 
       const postRef = doc(db, "posts", postId);
 
-      // Update the post document with the new title and text values
-      await updateDoc(postRef, {
+      const postSnapshot = await getDoc(postRef);
+      const docData = postSnapshot.data();
+      const currentFiles = docData.files || [];
+      const existingDocumentId = docData.documentId;
+
+      const updatedFiles = [...currentFiles, ...files];
+
+      const updates = {
         title: title,
         text: text,
-      });
+        files: updatedFiles,
+        documentId: existingDocumentId ? existingDocumentId : documentId,
+      };
+
+      console.log(updates);
+
+      await updateDoc(postRef, updates);
 
       return {
         postId: postId,
         title: title,
         text: text,
+        files: updatedFiles,
+        documentId,
       };
     } catch (error) {
       throw error;
@@ -216,25 +234,30 @@ export const updatePost = createAsyncThunk(
   }
 );
 
-// export const deleteDocument = createAsyncThunk(
-//   "post/deleteDocument",
-//   async ({ documentId }, thunkAPI) => {
-//     try {
-//       // Delete the document from Firebase Storage
-//       await deleteObject(ref(storage, `documents/${documentId}`));
+export const deleteDocument = createAsyncThunk(
+  "post/deleteDocument",
+  async ({ postId, documentId, index, filename }, thunkAPI) => {
+    try {
+      // Construct the file path using the documentId and filename
+      const filePath = `postFiles/${documentId}/${filename}`;
 
-//       // Remove the reference to the document from the specific document
-//       const postRef = doc(db, "posts", documentId);
-//       await updateDoc(postRef, {
-//         documentUrl: null,
-//       });
+      // Delete the file from Firebase Storage
+      await deleteObject(ref(storage, filePath));
 
-//       return documentId;
-//     } catch (error) {
-//       throw error;
-//     }
-//   }
-// );
+      // Remove the reference to the document from the specific document
+      const postRef = doc(db, "posts", postId);
+      const postDoc = await getDoc(postRef);
+      const postData = postDoc.data();
+      await updateDoc(postRef, {
+        files: arrayRemove(postData.files[index]),
+      });
+
+      return { postId, index };
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 export const createComment = createAsyncThunk(
   "post/createComment",

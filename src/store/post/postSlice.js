@@ -34,14 +34,15 @@ export const postSlice = createSlice({
   },
   extraReducers(builder) {
     builder
-      .addCase(uploadFiles.pending, state => {
-        state.status = "loading";
-      })
+      // .addCase(uploadFiles.pending, state => {
+      //   state.status = "loading";
+      // })
       .addCase(uploadFiles.fulfilled, state => {
         state.status = "succeeded";
       })
       .addCase(uploadFiles.rejected, (state, { error }) => {
         state.status = "failed";
+        console.log(error);
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
@@ -57,9 +58,9 @@ export const postSlice = createSlice({
         state.error.errorCode = error?.code;
         state.error.errorMessage = error.message;
       })
-      .addCase(handleVote.pending, state => {
-        state.status = "loading";
-      })
+      // .addCase(handleVote.pending, state => {
+      //   state.status = "loading";
+      // })
       .addCase(handleVote.fulfilled, (state, { payload }) => {
         const { postId, pollOptions, totalVotedUsers } = payload;
 
@@ -118,12 +119,15 @@ export const postSlice = createSlice({
         state.status = "loading";
       })
       .addCase(updatePost.fulfilled, (state, { payload }) => {
-        state.status = "succeeded";
-        const { postId, title, text } = payload;
+        const { postId, title, text, files, documentId } = payload;
         const post = state.posts.find(post => post.id === postId);
 
         post.title = title;
         post.text = text;
+        post.files = files;
+        post.documentId = documentId;
+
+        state.status = "succeeded";
       })
       .addCase(updatePost.rejected, (state, { error }) => {
         state.status = "failed";
@@ -131,18 +135,22 @@ export const postSlice = createSlice({
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
-      // .addCase(deleteDocument.pending, state => {
-      //   state.status = "loading";
-      // })
-      // .addCase(deleteDocument.fulfilled, (state, { payload }) => {
-      //   state.status = "succeeded";
-      // })
-      // .addCase(deleteDocument.rejected, (state, { error }) => {
-      //   state.status = "failed";
-      //   console.log(error);
-      //   state.error.errorCode = error.code;
-      //   state.error.errorMessage = error.message;
-      // })
+      .addCase(deleteDocument.fulfilled, (state, { payload }) => {
+        const { postId, index } = payload;
+
+        const post = state.posts.find(post => post.id === postId);
+
+        if (post) {
+          // Remove the specific index from the files array
+          post.files.splice(index, 1);
+        }
+      })
+      .addCase(deleteDocument.rejected, (state, { error }) => {
+        state.status = "failed";
+        console.log(error);
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
+      })
       .addCase(fetchPosts.pending, state => {
         state.status = "loading";
         state.error = null;

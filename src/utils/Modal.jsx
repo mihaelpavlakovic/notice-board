@@ -1,17 +1,32 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUser } from "../store/user/userSlice";
+import { selectUserData } from "../store/user/userSlice";
 import { updateProfileInfo } from "../store/user/userActions";
-import { updateComment, updatePost } from "../store/post/postActions";
-import { DocumentIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  deleteDocument,
+  generateId,
+  updateComment,
+  updatePost,
+  uploadFiles,
+} from "../store/post/postActions";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { resetUploadProgress, selectProgress } from "../store/post/postSlice";
 
 const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
-  const user = JSON.parse(useSelector(selectUser));
+  const uploadProgress = useSelector(selectProgress);
+  const [displayProgress, setDisplayProgress] = useState(false);
+  const user = useSelector(selectUserData);
   const [displayName, setDisplayName] = useState(user?.displayName);
   const [commentValue, setCommentValue] = useState(data.value);
   const [postTitleValue, setPostTitleValue] = useState(data.title);
   const [postTextValue, setPostTextValue] = useState(data.text);
+  const [files, setFiles] = useState([]);
+  const [fileObjects, setFileObjects] = useState([]);
+  const [documentId, setDocumentId] = useState(
+    data.documentId ? data.documentId : ""
+  );
   const dispatch = useDispatch();
+  const refValue = useRef();
 
   const newDisplayName = e => {
     setDisplayName(e.target.value);
@@ -29,12 +44,51 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
     setPostTextValue(e.target.value);
   };
 
-  const deleteHandler = e => {
-    console.log("delete");
+  const deleteHandler = (postId, documentId, index, filename) => {
+    dispatch(deleteDocument({ postId, documentId, index, filename }));
+  };
+
+  const reset = () => {
+    setDisplayProgress(false);
+    refValue.current.value = "";
+    setFiles([]);
+    dispatch(resetUploadProgress());
+  };
+
+  const uploadFilesHandler = () => {
+    setDisplayProgress(true);
+
+    if (data.documentId) {
+      const documentId = data.documentId;
+      console.log(files, documentId);
+      try {
+        dispatch(uploadFiles({ files, documentId })).then(response => {
+          setFileObjects(response.payload);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      const documentId = generateId();
+      console.log(files, documentId);
+      setDocumentId(documentId);
+      try {
+        dispatch(uploadFiles({ files, documentId })).then(response => {
+          setFileObjects(response.payload);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+
+    if (files.length > 0) {
+      setDisplayProgress(true);
+    }
+
     if (type === "user") {
       dispatch(updateProfileInfo(displayName)).then(() => onClose());
     } else if (type === "comment") {
@@ -47,6 +101,8 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
           postId: itemId,
           title: postTitleValue,
           text: postTextValue,
+          files: fileObjects,
+          documentId,
         })
       ).then(() => onClose());
     }
@@ -126,6 +182,51 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       />
                     </div>
                     <div className="pb-4">
+                      <label htmlFor="fileInput" className="block text-sm pb-2">
+                        Priloži datoteku:
+                      </label>
+
+                      <input
+                        id="fileInput"
+                        className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
+                        type="file"
+                        name="fileInput"
+                        ref={refValue}
+                        accept="application/msword, .docx, application/pdf, text/plain, image/*"
+                        multiple
+                        onChange={e => setFiles(Array.from(e.target.files))}
+                      />
+
+                      {files.length > 0 && (
+                        <div className="flex flex-col mt-3">
+                          {displayProgress && (
+                            <div className="h-4 bg-indigo-200 rounded">
+                              <div
+                                className="h-full bg-indigo-600 rounded"
+                                style={{ width: `${uploadProgress}%` }}
+                              ></div>
+                            </div>
+                          )}
+                          <div className="mt-3 flex flex-col gap-2 md:flex-row justify-between">
+                            <button
+                              type="button"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md w-full p-1 mt-2"
+                              onClick={uploadFilesHandler}
+                            >
+                              Primjeni
+                            </button>
+                            <button
+                              type="button"
+                              className="bg-white hover:font-bold text-indigo-700 font-semibold rounded-md border-2 border-indigo-700 w-full p-1 mt-2"
+                              onClick={reset}
+                            >
+                              Odustani
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="pb-4">
                       {data.files.length !== 0 &&
                         Object.entries(data.files).map((item, index) => {
                           if (
@@ -135,29 +236,54 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                             item[1].documentName.includes(".doc")
                           ) {
                             return (
-                              <a
+                              <div
+                                className="flex items-center gap-3"
                                 key={index}
-                                href={item[1].downloadURL}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="bg-gray-200 flex gap-3 items-center grow p-3 hover:bg-gray-300 hover:cursor-pointer"
                               >
-                                <DocumentIcon className="h-5 w-5 hover:cursor-pointer" />
-                                {item[1].documentName}
-                              </a>
+                                <button
+                                  type="button"
+                                  className="focus:outline-none"
+                                  onClick={() =>
+                                    deleteHandler(
+                                      data.id,
+                                      data.documentId,
+                                      index,
+                                      item[1].documentName
+                                    )
+                                  }
+                                >
+                                  <XMarkIcon className="h-5 w-5 text-red-500 hover:cursor-pointer" />
+                                </button>
+                                <div className="flex-shrink truncate">
+                                  <a
+                                    href={item[1].downloadURL}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="bg-gray-200 flex items-center gap-3 p-3 hover:bg-gray-300 hover:cursor-pointer truncate"
+                                  >
+                                    {item[1].documentName}
+                                  </a>
+                                </div>
+                              </div>
                             );
                           } else {
                             return (
-                              <div className="relative">
+                              <div className="relative" key={index}>
                                 <img
-                                  key={index}
                                   src={item[1].downloadURL}
                                   alt={`Slika ${index}`}
                                   className="w-[7rem]"
                                 />
                                 <button
                                   type="button"
-                                  onClick={deleteHandler}
+                                  onClick={() =>
+                                    deleteHandler(
+                                      data.id,
+                                      data.documentId,
+                                      index,
+                                      item[1].documentName
+                                    )
+                                  }
                                   className="absolute top-0 right-0 p-1 bg-red-500 rounded-full text-white"
                                 >
                                   <XMarkIcon className="h-4 w-4" />

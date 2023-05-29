@@ -7,13 +7,13 @@ import {
   resetUploadProgress,
   selectProgress,
   selectStatus,
-  selectUser,
+  selectUserData,
 } from "../store/user/userSlice";
 import { updateProfilePicture } from "../store/user/userActions";
 import Modal from "../utils/Modal";
 
 const Profile = () => {
-  const userData = JSON.parse(useSelector(selectUser));
+  const userData = useSelector(selectUserData);
   const status = useSelector(selectStatus);
   const uploadProgress = useSelector(selectProgress);
   const [display, setDisplay] = useState(false);
@@ -29,7 +29,6 @@ const Profile = () => {
     refValue.current.value = "";
     setImage(null);
     dispatch(resetUploadProgress());
-    // dispatch(databaseActions.removeImage());
   };
 
   const handleSelect = e => {

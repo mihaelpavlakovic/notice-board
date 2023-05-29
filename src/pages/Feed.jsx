@@ -10,7 +10,7 @@ import {
 } from "../store/post/postSlice";
 import { fetchPosts } from "../store/post/postActions";
 import Card from "../utils/Card";
-import { selectUser } from "../store/user/userSlice";
+import { selectUserData } from "../store/user/userSlice";
 import Post from "../utils/Post";
 import Spinner from "../utils/Spinner";
 
@@ -19,7 +19,7 @@ const Feed = () => {
   const posts = useSelector(selectPosts);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
-  const user = JSON.parse(useSelector(selectUser));
+  const user = useSelector(selectUserData);
 
   useEffect(() => {
     dispatch(fetchPosts());
