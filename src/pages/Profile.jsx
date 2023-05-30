@@ -55,7 +55,7 @@ const Profile = () => {
   return (
     <>
       <Nav />
-      <main className="xl:max-w-7xl xl:mx-auto max-w-full m-5 sm:px-[8%]">
+      <main className="mx-auto max-w-[65rem] px-5 sm:px-[8%]">
         {display && (
           <Modal
             type={"user"}
@@ -67,7 +67,7 @@ const Profile = () => {
           />
         )}
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl mb-5 font-semibold">Osobne informacije</h1>
+          <h1 className="text-3xl my-5 font-semibold">Osobne informacije</h1>
           <div className="border-2 border-solid rounded-md">
             <p className="text-lg p-3 border-b-2">Slika profila</p>
             <div className="flex flex-col md:flex-row items-center">

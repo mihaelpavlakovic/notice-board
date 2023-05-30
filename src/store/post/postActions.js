@@ -32,7 +32,6 @@ export const uploadFiles = createAsyncThunk(
   "post/uploadFiles",
   async ({ files, documentId }, thunkAPI) => {
     try {
-      console.log(files, documentId);
       const totalBytes = files.reduce((total, file) => total + file.size, 0);
 
       const uploadTasks = files.map(file => {
@@ -49,7 +48,7 @@ export const uploadFiles = createAsyncThunk(
             snapshot => {
               const bytesTransferred = snapshot.bytesTransferred;
               const progress = (bytesTransferred / totalBytes) * 100;
-              console.log(`Upload is ${progress}% done`);
+              // console.log(`Upload is ${progress}% done`);
 
               thunkAPI.dispatch(updateUploadProgress(progress));
             },
@@ -101,7 +100,6 @@ export const createPost = createAsyncThunk(
 
         if (uploadResult.payload) {
           downloadURLs = uploadResult.payload.map(file => {
-            console.log(file);
             const { downloadURL, documentName } = file;
             return { downloadURL, documentName };
           });
@@ -130,7 +128,6 @@ export const createPost = createAsyncThunk(
         };
       }
 
-      console.log(postData);
       await addDoc(collection(db, "posts"), postData);
     } catch (error) {
       throw error;
@@ -198,7 +195,6 @@ export const updatePost = createAsyncThunk(
   async (postData, thunkAPI) => {
     try {
       const { postId, title, text, files, documentId } = postData;
-      console.log("files:", files);
 
       const postRef = doc(db, "posts", postId);
 
@@ -215,8 +211,6 @@ export const updatePost = createAsyncThunk(
         files: updatedFiles,
         documentId: existingDocumentId ? existingDocumentId : documentId,
       };
-
-      console.log(updates);
 
       await updateDoc(postRef, updates);
 

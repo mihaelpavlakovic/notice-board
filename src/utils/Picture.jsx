@@ -20,7 +20,7 @@ const Picture = ({ src, alt }) => {
       <img
         src={src}
         alt={alt}
-        className="w-20 cursor-pointer"
+        className="w-20 cursor-pointer object-cover"
         onClick={toggleModal}
       />
 

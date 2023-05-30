@@ -26,11 +26,14 @@ const ResetPassword = () => {
   return (
     <>
       <Nav />
-      <div className="h-[40rem] flex justify-center items-center">
+      <div className="h-[90dvh] flex justify-center items-center">
         <Card>
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-            <div className="text-gray-700 p-5 sm:p-10 md:p-20">
-              <h1 className="text-3xl pb-2">Ponovno postavite vašu lozinku</h1>
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 w-[15rem] md:w-[25rem]"
+          >
+            <div className="text-gray-700">
+              <h1 className="text-2xl pb-2">Ponovno postavite vašu lozinku</h1>
               <div className="mt-6">
                 {emailSent && (
                   <p className="text-indigo-700 mb-2">
@@ -40,7 +43,7 @@ const ResetPassword = () => {
                 <div className="pb-4">
                   <label htmlFor="email">Email:</label>
                   <input
-                    className="w-full border rounded-md p-2"
+                    className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                     id="email"
                     name="email"
                     ref={focusElement}
@@ -52,7 +55,7 @@ const ResetPassword = () => {
                 </div>
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md w-full"
                 >
                   {status === "loading" ? "U tijeku..." : "Pošalji zahtjev"}
                 </button>

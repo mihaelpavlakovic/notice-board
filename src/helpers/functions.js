@@ -9,7 +9,10 @@ export const formatDateTime = timeToFormat => {
   const date = firebaseTimestamp.toDate();
 
   const formattedDate = date.toLocaleDateString("hr-HR");
-  const formattedTime = date.toLocaleTimeString("hr-HR");
+  const formattedTime = date.toLocaleTimeString("hr-HR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return `${formattedDate} - ${formattedTime}`;
 };

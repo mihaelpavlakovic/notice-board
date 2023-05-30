@@ -28,8 +28,8 @@ const Feed = () => {
   return (
     <>
       <Nav />
-      <div className="xl:max-w-7xl xl:mx-auto max-w-full px-5 sm:px-[8%]">
-        <h1 className="text-3xl my-5 font-semibold">
+      <div className="mx-auto max-w-[65rem] px-5 sm:px-[8%]">
+        <h1 className="text-2xl sm:text-3xl my-5 font-semibold">
           Pozdrav {user?.displayName}
         </h1>
         {status === "loading" && <Spinner />}

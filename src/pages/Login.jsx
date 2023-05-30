@@ -46,18 +46,21 @@ const Login = () => {
   return (
     <>
       <Nav />
-      <div className="h-[40rem] flex justify-center items-center">
+      <div className="h-[90dvh] flex justify-center items-center">
         <Card>
           {hasError && (
             <div>
               <p className="text-red-400 mb-2">{error.errorMessage}</p>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 w-[15rem] md:w-[25rem]"
+          >
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email">Email:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="email"
                 name="email"
                 ref={focusElement}
@@ -70,7 +73,7 @@ const Login = () => {
             <div className="flex flex-col gap-1.5">
               <label htmlFor="password">Lozinka:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="password"
                 name="password"
                 value={password}
@@ -87,7 +90,7 @@ const Login = () => {
             </button>
             <Link
               to="/promjena-lozinke"
-              className="text-indigo-700 hover:underline"
+              className="text-indigo-700 hover:underline text-center"
             >
               Ponovno postavi lozinku
             </Link>

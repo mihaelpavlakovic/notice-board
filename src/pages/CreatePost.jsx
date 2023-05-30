@@ -105,7 +105,7 @@ const CreatePost = () => {
                 </label>
                 <input
                   id="postTitle"
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700 "
+                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                   type="text"
                   name="postTitle"
                   value={postTitle}

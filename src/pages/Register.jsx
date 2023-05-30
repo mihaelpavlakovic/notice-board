@@ -118,11 +118,14 @@ const Register = () => {
               <p className="text-red-400 mb-2">{error.errorMessage}</p>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 w-[15rem] md:w-[25rem]"
+          >
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email">Email:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="email"
                 name="email"
                 ref={focusElement}
@@ -135,7 +138,7 @@ const Register = () => {
             <div className="flex flex-col gap-1.5">
               <label htmlFor="name">Ime i prezime:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="name"
                 name="name"
                 value={name}
@@ -171,7 +174,7 @@ const Register = () => {
                 </p>
               )}
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 type="file"
                 id="profilePicture"
                 name="profilePicture"
@@ -184,7 +187,7 @@ const Register = () => {
             <div className="flex flex-col gap-1.5">
               <label htmlFor="password">Lozinka:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="password"
                 name="password"
                 value={password}
@@ -201,7 +204,7 @@ const Register = () => {
             <div className="flex flex-col gap-1.5">
               <label htmlFor="passwordConfirm">Potvrdi lozinku:</label>
               <input
-                className="w-full border rounded-md p-2"
+                className="w-full rounded-md p-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                 id="passwordConfirm"
                 name="passwordConfirm"
                 value={passwordConfirm}

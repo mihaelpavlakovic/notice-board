@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUserData } from "../store/user/userSlice";
 import { updateProfileInfo } from "../store/user/userActions";
@@ -27,6 +27,20 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
   );
   const dispatch = useDispatch();
   const refValue = useRef();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [isOpen]);
+
+  const handleOverlayClick = e => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   const newDisplayName = e => {
     setDisplayName(e.target.value);
@@ -60,7 +74,6 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
 
     if (data.documentId) {
       const documentId = data.documentId;
-      console.log(files, documentId);
       try {
         dispatch(uploadFiles({ files, documentId })).then(response => {
           setFileObjects(response.payload);
@@ -70,7 +83,6 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
       }
     } else {
       const documentId = generateId();
-      console.log(files, documentId);
       setDocumentId(documentId);
       try {
         dispatch(uploadFiles({ files, documentId })).then(response => {
@@ -110,8 +122,11 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
   return (
     <>
       {isOpen && (
-        <div className="z-20 fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-12 mx-7 w-full sm:w-1/2 lg:w-1/3 rounded-xl">
+        <div
+          onClick={handleOverlayClick}
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+        >
+          <div className="bg-white p-5 d:p-12 mx-3 md:mx-7 w-full sm:w-1/2 lg:w-[40rem] rounded-xl">
             <h2 className="text-xl font-semibold mb-3">Uredite informacije:</h2>
             <form onSubmit={handleSubmit} className="text-gray-700">
               <div className="mt-4">
@@ -181,7 +196,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                         onChange={newPostTextValue}
                       />
                     </div>
-                    <div className="pb-4">
+                    <div>
                       <label htmlFor="fileInput" className="block text-sm pb-2">
                         Priloži datoteku:
                       </label>
@@ -198,16 +213,16 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       />
 
                       {files.length > 0 && (
-                        <div className="flex flex-col mt-3">
+                        <div className="flex flex-col">
                           {displayProgress && (
-                            <div className="h-4 bg-indigo-200 rounded">
+                            <div className="h-4 bg-indigo-200 rounded mt-3">
                               <div
                                 className="h-full bg-indigo-600 rounded"
                                 style={{ width: `${uploadProgress}%` }}
                               ></div>
                             </div>
                           )}
-                          <div className="mt-3 flex flex-col gap-2 md:flex-row justify-between">
+                          <div className="mt-2 flex gap-2 flex-row justify-between">
                             <button
                               type="button"
                               className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md w-full p-1 mt-2"
@@ -226,72 +241,89 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                         </div>
                       )}
                     </div>
-                    <div className="pb-4">
-                      {data.files.length !== 0 &&
-                        Object.entries(data.files).map((item, index) => {
-                          if (
-                            item[1].documentName.includes(".pdf") ||
-                            item[1].documentName.includes(".txt") ||
-                            item[1].documentName.includes(".docx") ||
-                            item[1].documentName.includes(".doc")
-                          ) {
-                            return (
-                              <div
-                                className="flex items-center gap-3"
-                                key={index}
-                              >
-                                <button
-                                  type="button"
-                                  className="focus:outline-none"
-                                  onClick={() =>
-                                    deleteHandler(
-                                      data.id,
-                                      data.documentId,
-                                      index,
-                                      item[1].documentName
-                                    )
-                                  }
-                                >
-                                  <XMarkIcon className="h-5 w-5 text-red-500 hover:cursor-pointer" />
-                                </button>
-                                <div className="flex-shrink truncate">
-                                  <a
-                                    href={item[1].downloadURL}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="bg-gray-200 flex items-center gap-3 p-3 hover:bg-gray-300 hover:cursor-pointer truncate"
+                    <div className="my-4 overflow-y-auto max-h-[10rem] grid grid-cols-3 md:grid-cols-4 gap-4">
+                      {data.files.length !== 0 && (
+                        <>
+                          {Object.entries(data.files).map((item, index) => {
+                            if (
+                              !(
+                                item[1].documentName.includes(".pdf") ||
+                                item[1].documentName.includes(".txt") ||
+                                item[1].documentName.includes(".docx") ||
+                                item[1].documentName.includes(".doc")
+                              )
+                            ) {
+                              return (
+                                <div className="relative" key={index}>
+                                  <img
+                                    src={item[1].downloadURL}
+                                    alt={`Slika ${index}`}
+                                    className="w-full"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      deleteHandler(
+                                        data.id,
+                                        data.documentId,
+                                        index,
+                                        item[1].documentName
+                                      )
+                                    }
+                                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
                                   >
-                                    {item[1].documentName}
-                                  </a>
+                                    <XMarkIcon className="h-4 w-4" />
+                                  </button>
                                 </div>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <div className="relative" key={index}>
-                                <img
-                                  src={item[1].downloadURL}
-                                  alt={`Slika ${index}`}
-                                  className="w-[7rem]"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    deleteHandler(
-                                      data.id,
-                                      data.documentId,
-                                      index,
-                                      item[1].documentName
-                                    )
-                                  }
-                                  className="absolute top-0 right-0 p-1 bg-red-500 rounded-full text-white"
+                              );
+                            }
+                            return null;
+                          })}
+                          {Object.entries(data.files).map((item, index) => {
+                            if (
+                              item[1].documentName.includes(".pdf") ||
+                              item[1].documentName.includes(".txt") ||
+                              item[1].documentName.includes(".docx") ||
+                              item[1].documentName.includes(".doc")
+                            ) {
+                              return (
+                                <div
+                                  className="flex items-center bg-gray-200 col-span-3 md:col-span-2"
+                                  key={index}
                                 >
-                                  <XMarkIcon className="h-4 w-4" />
-                                </button>
-                              </div>
-                            );
-                          }
-                        })}
+                                  <button
+                                    type="button"
+                                    className="focus:outline-none p-3"
+                                    onClick={() =>
+                                      deleteHandler(
+                                        data.id,
+                                        data.documentId,
+                                        index,
+                                        item[1].documentName
+                                      )
+                                    }
+                                  >
+                                    <XMarkIcon className="h-5 w-5 text-red-500 hover:cursor-pointer" />
+                                  </button>
+                                  <div className="flex-shrink truncate">
+                                    <a
+                                      href={item[1].downloadURL}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="bg-gray-200 flex items-center gap-3 py-3 pr-3 hover:bg-gray-300 hover:cursor-pointer"
+                                    >
+                                      <span className="truncate">
+                                        {item[1].documentName}
+                                      </span>
+                                    </a>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })}
+                        </>
+                      )}
                     </div>
                   </>
                 )}
