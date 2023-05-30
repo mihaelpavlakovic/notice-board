@@ -12,14 +12,13 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUser, selectUserData } from "../store/user/userSlice";
+import { selectUserData } from "../store/user/userSlice";
 import PostComment from "./PostComment";
 import Modal from "./Modal";
 import Picture from "./Picture";
 
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
-  const user = useSelector(selectUser);
   const userData = useSelector(selectUserData);
   const [comment, setComment] = useState("");
   const [display, setDisplay] = useState(false);
@@ -186,9 +185,9 @@ const Post = ({ postData }) => {
                 </div>
                 <button
                   onClick={() => handleVoteAction(postData.id, index)}
-                  disabled={postData?.totalVotedUsers?.includes(user.uid)}
+                  disabled={postData?.totalVotedUsers?.includes(userData?.uid)}
                   className={`py-1 px-2 rounded ${
-                    !postData?.totalVotedUsers?.includes(user.uid)
+                    !postData?.totalVotedUsers?.includes(userData.uid)
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
                       : "bg-indigo-600 bg-opacity-80 text-white font-semibold"
                   }`}

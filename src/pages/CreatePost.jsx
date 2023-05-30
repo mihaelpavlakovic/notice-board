@@ -1,5 +1,5 @@
 // react imports
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 // component imports
 import Nav from "../layouts/Nav";
@@ -20,16 +20,34 @@ const CreatePost = () => {
   const [files, setFiles] = useState([]);
   const [selectedValue, setSelectedValue] = useState("");
   const [pollOptions, setPollOptions] = useState([]);
+  const [titleError, setTitleError] = useState("");
+  const [optionError, setOptionError] = useState("");
 
   const handleSelectChange = event => {
     setSelectedValue(event.target.value);
   };
 
+  const handleTitleInputFocus = () => {
+    setTitleError("");
+  };
+
+  const handleOptionInputFocus = () => {
+    setOptionError("");
+  };
+
   const handleAddPollOption = () => {
-    setPollOptions(prevOptions => [
-      ...prevOptions,
-      { name: "", votes: 0, votedUsers: [] },
-    ]);
+    if (pollOptions.length === 0) {
+      setPollOptions(prevOptions => [
+        ...prevOptions,
+        { name: "", votes: 0, votedUsers: [] },
+        { name: "", votes: 0, votedUsers: [] },
+      ]);
+    } else {
+      setPollOptions(prevOptions => [
+        ...prevOptions,
+        { name: "", votes: 0, votedUsers: [] },
+      ]);
+    }
   };
 
   const handlePollOptionChange = (event, index) => {
@@ -51,41 +69,41 @@ const CreatePost = () => {
     }
   };
 
-  useEffect(() => {
-    if (pollOptionRefs.current.length > 0) {
-      const lastInput =
-        pollOptionRefs.current[pollOptionRefs.current.length - 1];
-      if (lastInput && document.contains(lastInput)) {
-        lastInput.focus();
-      }
-    }
-  }, [pollOptions]);
-
   const handleSubmit = e => {
     e.preventDefault();
+
+    let hasError = false;
+
     if (files.length > 0) {
       setDisplayProgress(true);
     }
 
-    if (postTitle.trim() !== "" && selectedValue !== "option1") {
+    if (postTitle.trim() === "") {
+      setTitleError("Naslov ne smije ostati prazan.");
+      hasError = true;
+    }
+
+    if (selectedValue === "option1") {
+      if (pollOptions.length <= 1) {
+        setOptionError("Morate imati minimalno 2 opcije.");
+        hasError = true;
+      } else if (!pollOptions.every(option => option.name.trim() !== "")) {
+        setOptionError("Morate popuniti sva polja za opcije glasanja.");
+        hasError = true;
+      }
+    }
+
+    if (!hasError) {
       dispatch(createPost({ postTitle, postText, files, pollOptions })).then(
         () => {
           navigate("/");
           dispatch(resetUploadProgress());
-        }
-      );
-    } else if (pollOptions.length > 1) {
-      dispatch(createPost({ postTitle, postText, files, pollOptions })).then(
-        () => {
-          navigate("/");
-          dispatch(resetUploadProgress());
+          setPostTitle("");
+          setPostText("");
+          setFiles([]);
         }
       );
     }
-
-    setPostTitle("");
-    setPostText("");
-    setFiles([]);
   };
 
   return (
@@ -105,12 +123,18 @@ const CreatePost = () => {
                 </label>
                 <input
                   id="postTitle"
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
+                  className={`border-2 ${
+                    titleError ? "border-red-500" : "border-gray-500"
+                  } p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700`}
                   type="text"
                   name="postTitle"
                   value={postTitle}
                   onChange={e => setPostTitle(e.target.value)}
+                  onFocus={handleTitleInputFocus}
                 />
+                {titleError !== "" && (
+                  <p className="mt-1 text-red-500">{titleError}</p>
+                )}
               </div>
 
               <div className="pb-4">
@@ -153,7 +177,7 @@ const CreatePost = () => {
                   id="selectValue"
                   value={selectedValue}
                   onChange={handleSelectChange}
-                  className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
+                  className={`border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700`}
                 >
                   <option value="">Dodatak nije odabran</option>
                   <option value="option1">Kreiraj glasanje</option>
@@ -166,8 +190,12 @@ const CreatePost = () => {
                         <input
                           type="text"
                           placeholder={`Enter poll option ${index + 1}`}
-                          value={option.name} // Update this line
-                          className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
+                          value={option.name}
+                          className={`border-2 ${
+                            optionError !== ""
+                              ? "border-red-500"
+                              : "border-gray-500"
+                          } p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700`}
                           onChange={event =>
                             handlePollOptionChange(event, index)
                           }
@@ -177,6 +205,7 @@ const CreatePost = () => {
                           ref={inputRef =>
                             (pollOptionRefs.current[index] = inputRef)
                           }
+                          onFocus={handleOptionInputFocus}
                         />
 
                         <button
@@ -188,6 +217,11 @@ const CreatePost = () => {
                         </button>
                       </div>
                     ))}
+
+                    {optionError !== "" && (
+                      <p className="mt-1 text-red-500">{optionError}</p>
+                    )}
+
                     <button
                       type="button"
                       className="mt-3 bg-transparent hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-md"

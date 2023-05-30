@@ -29,11 +29,16 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
   const refValue = useRef();
 
   useEffect(() => {
+    const bodyElement = document.body;
     if (isOpen) {
-      document.body.classList.add("overflow-hidden");
+      bodyElement.classList.add("overflow-hidden");
     } else {
-      document.body.classList.remove("overflow-hidden");
+      bodyElement.classList.remove("overflow-hidden");
     }
+
+    return () => {
+      bodyElement.classList.remove("overflow-hidden");
+    };
   }, [isOpen]);
 
   const handleOverlayClick = e => {
@@ -137,7 +142,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                     </label>
 
                     <input
-                      className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
+                      className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                       type="text"
                       id="displayName"
                       name="displayName"
@@ -154,7 +159,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                     </label>
 
                     <input
-                      className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
+                      className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                       type="text"
                       id="comment"
                       name="comment"
@@ -172,7 +177,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       </label>
 
                       <input
-                        className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
+                        className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                         type="text"
                         id="postTitle"
                         name="postTitle"
@@ -187,7 +192,7 @@ const Modal = ({ isOpen, onClose, type, index, itemId, data }) => {
                       </label>
 
                       <input
-                        className="border-2 border-gray-500 p-2 rounded-md w-full focus:border-indigo-700 focus:ring-indigo-700"
+                        className="border-2 border-gray-500 p-2 rounded-md w-full focus:outline-none focus:border-indigo-700 focus:ring-indigo-700"
                         type="text"
                         id="postText"
                         name="postText"

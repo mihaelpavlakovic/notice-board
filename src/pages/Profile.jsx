@@ -11,6 +11,7 @@ import {
 } from "../store/user/userSlice";
 import { deleteUser, updateProfilePicture } from "../store/user/userActions";
 import Modal from "../utils/Modal";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 
 const Profile = () => {
   const userData = useSelector(selectUserData);
@@ -133,9 +134,10 @@ const Profile = () => {
             <div className="border-2 border-solid rounded-md w-full">
               <div className="p-3 border-b-2 flex justify-between items-center">
                 <h2 className="text-lg">Info</h2>
-                <button type="button" onClick={() => setDisplay(true)}>
-                  Uredi
-                </button>
+                <PencilSquareIcon
+                  className="h-6 sm:h-5 w-6 sm:w-5 hover:cursor-pointer hover:text-indigo-600"
+                  onClick={() => setDisplay(true)}
+                />
               </div>
               <div className="flex flex-col gap-3 p-3">
                 <p>Ime i prezime: {userData?.displayName}</p>
@@ -153,7 +155,7 @@ const Profile = () => {
                 dispatch(deleteUser());
               }
             }}
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md w-full p-2 mt-2"
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md w-full p-2 mt-2 mb-5"
           >
             Obriši Račun
           </button>
