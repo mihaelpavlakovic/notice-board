@@ -111,7 +111,7 @@ const Register = () => {
     <>
       <Nav />
 
-      <div className="h-[40rem] flex justify-center items-center">
+      <div className="flex justify-center items-center py-5">
         <Card>
           {hasError && (
             <div>

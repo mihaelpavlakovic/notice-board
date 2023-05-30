@@ -24,6 +24,7 @@ import {
   getDoc,
   getDocs,
   query,
+  refEqual,
   setDoc,
   updateDoc,
   where,
@@ -260,6 +261,32 @@ export const deleteUser = createAsyncThunk(
 
         // Delete the post document
         await deleteDoc(doc.ref);
+      });
+
+      // Query the posts collection where comments array is not empty
+      const postsQuery = query(
+        collection(db, "posts"),
+        where("comments", "!=", [])
+      );
+
+      // Fetch the posts
+      const postsSnapshot = await getDocs(postsQuery);
+
+      // Iterate over the posts
+      postsSnapshot.forEach(async postDoc => {
+        const postData = postDoc.data();
+        const comments = postData.comments;
+
+        // Check if comments array exists and is not empty
+        if (Array.isArray(comments) && comments.length > 0) {
+          // Find the matching comments by the currently signed-in user
+          const updatedComments = comments.filter(
+            comment => !refEqual(comment.user, userRef)
+          );
+
+          // Update the post document with the modified comments array
+          await updateDoc(postDoc.ref, { comments: updatedComments });
+        }
       });
 
       const imageTypes = ["image/png", "image/jpeg", "image/jpg"];
