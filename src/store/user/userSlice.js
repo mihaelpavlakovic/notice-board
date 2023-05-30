@@ -9,6 +9,7 @@ import {
   updateProfileInfo,
   updateProfilePicture,
   uploadImage,
+  deleteUser,
 } from "./userActions";
 
 export const userSlice = createSlice({
@@ -27,8 +28,8 @@ export const userSlice = createSlice({
     },
   },
   reducers: {
-    setCurrentUser: (state, action) => {
-      state.user = action.payload;
+    setCurrentUser: (state, { payload }) => {
+      state.user = payload;
       state.isLoading = false;
     },
     updateUploadProgress: (state, { payload }) => {
@@ -79,7 +80,7 @@ export const userSlice = createSlice({
       .addCase(register.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
         state.hasError = false;
-        state.user = payload;
+        state.userData = payload;
         state.error.errorCode = "";
         state.error.errorMessage = "";
       })
@@ -133,12 +134,12 @@ export const userSlice = createSlice({
         state.hasError = false;
       })
       .addCase(logout.fulfilled, state => {
-        state.status = "succeeded";
         state.hasError = false;
         state.user = null;
         state.userData = null;
         state.error.errorCode = "";
         state.error.errorMessage = "";
+        state.status = "succeeded";
       })
       .addCase(logout.rejected, (state, { error }) => {
         state.status = "failed";
@@ -200,6 +201,20 @@ export const userSlice = createSlice({
         state.userData.displayName = payload;
       })
       .addCase(updateProfileInfo.rejected, (state, { error }) => {
+        state.status = "failed";
+        state.hasError = true;
+        state.error.errorCode = error.code;
+        state.error.errorMessage = error.message;
+      })
+      .addCase(deleteUser.pending, state => {
+        state.status = "loading";
+        state.hasError = false;
+      })
+      .addCase(deleteUser.fulfilled, (state, { payload }) => {
+        state.status = "succeeded";
+        state.hasError = false;
+      })
+      .addCase(deleteUser.rejected, (state, { error }) => {
         state.status = "failed";
         state.hasError = true;
         state.error.errorCode = error.code;

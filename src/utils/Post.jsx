@@ -19,7 +19,7 @@ import Picture from "./Picture";
 
 const Post = ({ postData }) => {
   const dispatch = useDispatch();
-  const user = JSON.parse(useSelector(selectUser));
+  const user = useSelector(selectUser);
   const userData = useSelector(selectUserData);
   const [comment, setComment] = useState("");
   const [display, setDisplay] = useState(false);
@@ -102,6 +102,39 @@ const Post = ({ postData }) => {
         <h2 className="text-2xl font-semibold">{postData.title}</h2>
       </div>
       <p className="text-gray-500">{postData.text}</p>
+      {postData.files.length !== 0 && (
+        <div className="flex flex-wrap gap-2 overflow-hidden">
+          {Object.entries(postData.files).map((item, index) => {
+            if (
+              item[1].documentName.includes(".pdf") ||
+              item[1].documentName.includes(".txt") ||
+              item[1].documentName.includes(".docx") ||
+              item[1].documentName.includes(".doc")
+            ) {
+              return (
+                <a
+                  key={index}
+                  href={item[1].downloadURL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-gray-200 flex gap-3 items-center grow p-3 hover:bg-gray-300 hover:cursor-pointer"
+                >
+                  <DocumentIcon className="h-5 w-5 hover:cursor-pointer" />
+                  {item[1].documentName}
+                </a>
+              );
+            } else {
+              return (
+                <Picture
+                  key={index}
+                  src={item[1].downloadURL}
+                  alt={`Slika ${index}`}
+                />
+              );
+            }
+          })}
+        </div>
+      )}
       {postData?.pollOptions && (
         <ul className="space-y-4">
           {postData.pollOptions.map((option, index) => (
@@ -133,38 +166,6 @@ const Post = ({ postData }) => {
           ))}
         </ul>
       )}
-      <div className="flex flex-wrap gap-2 overflow-hidden">
-        {postData.files.length !== 0 &&
-          Object.entries(postData.files).map((item, index) => {
-            if (
-              item[1].documentName.includes(".pdf") ||
-              item[1].documentName.includes(".txt") ||
-              item[1].documentName.includes(".docx") ||
-              item[1].documentName.includes(".doc")
-            ) {
-              return (
-                <a
-                  key={index}
-                  href={item[1].downloadURL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-gray-200 flex gap-3 items-center grow p-3 hover:bg-gray-300 hover:cursor-pointer"
-                >
-                  <DocumentIcon className="h-5 w-5 hover:cursor-pointer" />
-                  {item[1].documentName}
-                </a>
-              );
-            } else {
-              return (
-                <Picture
-                  key={index}
-                  src={item[1].downloadURL}
-                  alt={`Slika ${index}`}
-                />
-              );
-            }
-          })}
-      </div>
       <div>
         {postData?.comments.length === 0
           ? "Objava nema komentara"

@@ -102,8 +102,7 @@ export const createPost = createAsyncThunk(
         if (uploadResult.payload) {
           downloadURLs = uploadResult.payload.map(file => {
             console.log(file);
-            const { downloadURL } = file;
-            const documentName = file.name;
+            const { downloadURL, documentName } = file;
             return { downloadURL, documentName };
           });
         }
@@ -282,7 +281,7 @@ export const createComment = createAsyncThunk(
       return {
         postId,
         comment,
-        user: thunkAPI.getState().user.user,
+        user: thunkAPI.getState().user.userData,
       };
     } catch (error) {
       throw error;

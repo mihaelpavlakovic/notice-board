@@ -9,7 +9,7 @@ import {
   selectStatus,
   selectUserData,
 } from "../store/user/userSlice";
-import { updateProfilePicture } from "../store/user/userActions";
+import { deleteUser, updateProfilePicture } from "../store/user/userActions";
 import Modal from "../utils/Modal";
 
 const Profile = () => {
@@ -143,6 +143,20 @@ const Profile = () => {
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              const confirmed = window.confirm(
+                "Jeste li sigurni da želite obrisati račun?"
+              );
+              if (confirmed) {
+                dispatch(deleteUser());
+              }
+            }}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md w-full p-2 mt-2"
+          >
+            Obriši Račun
+          </button>
         </div>
       </main>
     </>

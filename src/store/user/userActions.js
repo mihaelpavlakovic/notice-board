@@ -10,9 +10,24 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { setCurrentUser, updateEmailSent } from "./userSlice";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { updateUploadProgress } from "./userSlice";
 
 export const uploadImage = createAsyncThunk(
@@ -59,10 +74,15 @@ export const uploadImage = createAsyncThunk(
 export const listenAuthState = createAsyncThunk(
   "user/listenAuthState",
   async (_, { dispatch }) => {
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (user) {
-        dispatch(setCurrentUser(JSON.stringify(user)));
-        dispatch(fetchUserById(user.uid));
+        try {
+          const userData = await dispatch(fetchUserById(user.uid));
+          dispatch(setCurrentUser(userData));
+        } catch (error) {
+          // Handle the error, such as dispatching an action to set an error state
+          console.log(error);
+        }
       } else {
         dispatch(setCurrentUser(null));
       }
@@ -92,15 +112,17 @@ export const register = createAsyncThunk(
       });
 
       const docRef = doc(db, "users", user.uid);
-      await setDoc(docRef, {
+      const userObj = {
         uid: user.uid,
         displayName: name,
         email: email,
         isAdmin: false,
         photoURL: downloadURL.payload,
-      });
+      };
 
-      return JSON.stringify(user);
+      await setDoc(docRef, userObj);
+
+      return userObj;
     } catch (error) {
       throw error;
     }
@@ -142,9 +164,10 @@ export const fetchUserById = createAsyncThunk(
 
       if (userDocSnapshot.exists()) {
         return userDocSnapshot.data();
-      } else {
-        throw new Error(`User with ID ${userId} does not exist`);
       }
+      // } else {
+      //   throw new Error(`User with ID ${userId} does not exist`);
+      // }
     } catch (error) {
       throw error;
     }
@@ -204,7 +227,74 @@ export const updateProfileInfo = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk("auth/logout", async () => {
+export const deleteUser = createAsyncThunk(
+  "user/deleteUser",
+  async (_, thunkAPI) => {
+    try {
+      const userId = auth.currentUser.uid;
+      const userRef = doc(db, "users", userId);
+
+      // Get the user's posts
+      const userPostsQuery = query(
+        collection(db, "posts"),
+        where("user", "==", userRef)
+      );
+      const userPostsSnapshot = await getDocs(userPostsQuery);
+
+      // Delete the user's posts
+      userPostsSnapshot.forEach(async doc => {
+        // Get the files array from the post document
+        const filesArray = doc.data().files;
+
+        if (filesArray) {
+          // Iterate over the files array and delete the files from storage
+          filesArray.forEach(async file => {
+            // Check if the file has a downloadURL
+            if (file.downloadURL) {
+              // Delete the file from storage
+              const filePath = `postFiles/${doc.data().documentId}`;
+              await deleteObject(ref(storage, filePath));
+            }
+          });
+        }
+
+        // Delete the post document
+        await deleteDoc(doc.ref);
+      });
+
+      const imageTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+      // Get the user's profile picture URL from auth.currentUser
+      const profilePictureURL = auth.currentUser.photoURL;
+
+      // Check if the user has a profile picture URL
+      if (profilePictureURL) {
+        // Extract the file name from the profile picture URL
+        const fileName = profilePictureURL.split("/").pop();
+
+        // Extract the file extension from the file name
+        const fileExtension = fileName.split(".").pop().split("?")[0];
+
+        // Check if the file extension is one of the specified image types
+        if (fileExtension && imageTypes.includes(`image/${fileExtension}`)) {
+          // Delete the user's profile picture
+          const profilePicturePath = `profilePictures/${userId}.${fileExtension}`;
+          await deleteObject(ref(storage, profilePicturePath));
+        }
+      }
+
+      // Delete the user
+      await deleteDoc(userRef);
+
+      // Sign out the user
+      await auth.signOut();
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const logout = createAsyncThunk("user/logout", async () => {
   try {
     await auth.signOut();
   } catch (error) {

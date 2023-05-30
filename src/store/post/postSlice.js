@@ -55,7 +55,7 @@ export const postSlice = createSlice({
       .addCase(createPost.rejected, (state, { error }) => {
         state.status = "failed";
         console.log(error);
-        state.error.errorCode = error?.code;
+        state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
       // .addCase(handleVote.pending, state => {
@@ -81,14 +81,14 @@ export const postSlice = createSlice({
         state.error.errorCode = error.code;
         state.error.errorMessage = error.message;
       })
-      .addCase(createComment.pending, state => {
-        state.status = "loading";
-      })
+      // .addCase(createComment.pending, state => {
+      //   state.status = "loading";
+      // })
       .addCase(createComment.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
         const { postId, comment, user } = payload;
         comment.createdAt = comment.createdAt.toLocaleString();
-        comment.user = JSON.parse(user);
+        comment.user = user;
         const post = state.posts.find(post => post.id === postId);
 
         post.comments.push(comment);
@@ -99,9 +99,9 @@ export const postSlice = createSlice({
         state.error.errorCode = error?.code;
         state.error.errorMessage = error.message;
       })
-      .addCase(updateComment.pending, state => {
-        state.status = "loading";
-      })
+      // .addCase(updateComment.pending, state => {
+      //   state.status = "loading";
+      // })
       .addCase(updateComment.fulfilled, (state, { payload }) => {
         state.status = "succeeded";
         const { postId, commentId, commentValue } = payload;
