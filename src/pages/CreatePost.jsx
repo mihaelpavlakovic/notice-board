@@ -189,7 +189,7 @@ const CreatePost = () => {
                       <div key={index} className="flex items-center">
                         <input
                           type="text"
-                          placeholder={`Enter poll option ${index + 1}`}
+                          placeholder={`Ponuđena opcija broj ${index + 1}`}
                           value={option.name}
                           className={`border-2 ${
                             optionError !== ""
