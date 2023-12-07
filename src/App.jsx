@@ -11,11 +11,7 @@ function App() {
     dispatch(listenAuthState());
   }, [dispatch]);
 
-  return (
-    <div className='App'>
-      <RouterProvider router={router} />
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
